@@ -29,7 +29,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract class OnboardingActivity extends AppCompatActivity implements View.OnClickListener, ViewPager.OnPageChangeListener {
+public abstract class OnboardingActivity extends AppCompatActivity implements View.OnClickListener, ViewPager.OnPageChangeListener {
 
     //TODO fix when canAdvance(true) changes to canAdvance(false)
 
@@ -43,7 +43,7 @@ abstract class OnboardingActivity extends AppCompatActivity implements View.OnCl
 
     protected abstract void addFragments();
 
-    void addFragment(OnboardingFragment fragment) {
+    public void addFragment(OnboardingFragment fragment) {
         fragmentContainers.add(new FragmentContainer(fragment));
     }
 
