@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -172,7 +173,7 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         }
     }
 
-    abstract void onFinish();
+    public abstract void onFinish();
 
     private void notifyViewPager() {
         onboardingAdapter.notifyDataSetChanged();
@@ -253,9 +254,9 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
     public static abstract class OnboardingFragment extends Fragment {
         private boolean canAdvance = false;
-        WeakReference<FragmentActivity> activity;
+        private WeakReference<FragmentActivity> activity;
 
-        void notifyViewPager(boolean canAdvance) {
+        public void notifyViewPager(boolean canAdvance) {
             this.canAdvance = canAdvance;
 
             if (this.getActivity() != null) {
@@ -267,7 +268,11 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
             return canAdvance;
         }
 
-        abstract void onFinish();
+        public abstract void onFinish();
+
+        public FragmentActivity getFragmentActivity() {
+            return activity.get();
+        }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
