@@ -1,0 +1,24 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+
+    </style>
+
+    <style name="AppTheme.Card">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:clickable">true</item>
+        <item name="android:layout_marginLeft">@dimen/margin_standard</item>
+        <item name="android:layout_marginRight">@dimen/margin_standard</item>
+        <item name="android:layout_marginTop">@dimen/margin_standard</item>
+        <item name="android:paddingLeft">@dimen/margin_standard</item>
+        <item name="android:paddingRight">@dimen/margin_standard</item>
+        <item name="android:paddingTop">@dimen/margin_standard</item>
+        <item name="android:paddingBottom">@dimen/margin_standard</item>
+        <item name="cardBackgroundColor">@color/card_background</item>
+        <item name="cardCornerRadius">@dimen/margin_quarter</item>
+        <item name="cardElevation">@dimen/margin_standard</item>
+    </style>
+
+</resources>
