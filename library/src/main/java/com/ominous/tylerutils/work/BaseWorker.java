@@ -21,17 +21,21 @@ public abstract class BaseWorker<T extends GenericWorker> extends Worker impleme
     @Override
     public Result doWork() {
         try {
-            return Result.success(worker.doWork(new GenericWorker.WorkerInterface() {
-                @Override
-                public boolean isCancelled() {
-                    return BaseWorker.this.isStopped();
-                }
+            if (worker == null) {
+                return Result.failure(new Data.Builder().putString(KEY_ERROR_MESSAGE,"GenericWorker is null").build());
+            } else {
+                return Result.success(worker.doWork(new GenericWorker.WorkerInterface() {
+                    @Override
+                    public boolean isCancelled() {
+                        return BaseWorker.this.isStopped();
+                    }
 
-                @Override
-                public void onProgress(int progress, int max) {
-                    //Cannot post progress from a Worker
-                }
-            }));
+                    @Override
+                    public void onProgress(int progress, int max) {
+                        //Cannot post progress from a Worker
+                    }
+                }));
+            }
         } catch (Throwable t) {
             StringBuilder stackTrace = new StringBuilder();
 

@@ -15,7 +15,13 @@ public abstract class BaseAsyncTask<T extends GenericWorker> extends AsyncTask<V
     }
 
     public final Data doWork() throws Throwable {
-        return workerRef.get().doWork(new GenericWorker.WorkerInterface() {
+        GenericWorker worker = workerRef.get();
+
+        if (worker == null) {
+            throw new Exception("GenericWorker is null");
+        }
+
+        return worker.doWork(new GenericWorker.WorkerInterface() {
             @Override
             public boolean isCancelled() {
                 return BaseAsyncTask.this.isCancelled();

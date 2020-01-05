@@ -2,6 +2,7 @@ package com.ominous.tylerutils.work;
 
 import android.content.Context;
 
+import androidx.annotation.Nullable;
 import androidx.work.Data;
 
 public abstract class GenericWorker {
@@ -19,6 +20,7 @@ public abstract class GenericWorker {
     }
 
     public interface WorkerFactory <T extends GenericWorker> {
+        @Nullable
         T getWorker(Context context);
     }
 
