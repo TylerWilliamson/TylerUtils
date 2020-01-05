@@ -12,10 +12,11 @@ import androidx.appcompat.app.AppCompatDelegate;
 public class ColorUtils {
 
     public static void setNightMode(Context context) {
+        setNightMode(context,AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+    }
+    public static void setNightMode(Context context, int mode) {
         //using a dummy WebView to avoid an Android bug regarding Dark Mode
         new WebView(context);
-
-        int mode = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
 
         AppCompatDelegate.setDefaultNightMode(mode);
     }
