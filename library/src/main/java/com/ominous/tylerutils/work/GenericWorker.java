@@ -5,14 +5,14 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 import androidx.work.Data;
 
-public abstract class GenericWorker {
+public abstract class GenericWorker<T extends GenericResults> {
     private Context context;
 
     public GenericWorker(Context context) {
         this.context = context;
     }
 
-    public abstract Data doWork(WorkerInterface workerInterface) throws Throwable;
+    public abstract T doWork(WorkerInterface workerInterface) throws Throwable;
 
     public interface WorkerInterface {
         boolean isCancelled();

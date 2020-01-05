@@ -38,7 +38,7 @@ public abstract class BaseWorker<T extends GenericWorker> extends Worker impleme
                     public void onProgress(int progress, int max) {
                         //Cannot post progress from a Worker
                     }
-                }));
+                }).getData());
             }
         } catch (Throwable t) {
             StringBuilder stackTrace = new StringBuilder();

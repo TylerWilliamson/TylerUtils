@@ -18,7 +18,7 @@ public abstract class BaseAsyncTask<T extends GenericWorker> extends AsyncTask<V
         workerRef = new WeakReference<>(worker);
     }
 
-    public final Data doWork() throws Throwable {
+    public final Object doWork() throws Throwable {
         GenericWorker worker = workerRef.get();
 
         if (worker == null) {
@@ -35,6 +35,6 @@ public abstract class BaseAsyncTask<T extends GenericWorker> extends AsyncTask<V
             public void onProgress(int progress, int max) {
                 BaseAsyncTask.this.publishProgress(progress,max);
             }
-        });
+        }).getResults();
     }
 }
