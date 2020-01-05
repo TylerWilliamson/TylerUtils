@@ -7,9 +7,5 @@
     <color name="background_primary">@color/color_grey_30</color>
     <color name="background_primary_dark">@color/color_grey_21</color>
 
-    <color name="button_background_enabled">@color/color_grey_61</color>
-    <color name="button_background_disabled">@color/color_grey_42</color>
-    <color name="button_background_selected">@color/color_accent_emphasis</color>
-
     <color name="card_background">@color/color_grey_42</color>
 </resources>
