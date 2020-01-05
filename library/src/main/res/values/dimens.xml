@@ -14,5 +14,4 @@
     <dimen name="elevation_standard">4dp</dimen>
 
     <dimen name="fab_size">56dp</dimen>
-    <dimen name="nowplayingview_header_height">64dp</dimen>
 </resources>
