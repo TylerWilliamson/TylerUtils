@@ -2,7 +2,7 @@ package com.ominous.tylerutils.work;
 
 import android.content.Context;
 
-import androidx.work.ListenableWorker;
+import androidx.work.Data;
 
 public abstract class GenericWorker {
     private Context context;
@@ -11,7 +11,7 @@ public abstract class GenericWorker {
         this.context = context;
     }
 
-    public abstract ListenableWorker.Result doWork(WorkerInterface workerInterface);
+    public abstract Data doWork(WorkerInterface workerInterface) throws Throwable;
 
     public interface WorkerInterface {
         boolean isCancelled();
