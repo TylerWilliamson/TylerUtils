@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -81,10 +80,10 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
         this.setContentView(R.layout.activity_onboarding);
 
-        nextButton = findViewById(R.id.button_next);
-        finishButton = findViewById(R.id.button_finish);
-        viewPager = findViewById(R.id.container);
-        indicators = findViewById(R.id.indicators);
+        nextButton = findViewById(com.ominous.tylerutils.R.id.button_next);
+        finishButton = findViewById(com.ominous.tylerutils.R.id.button_finish);
+        viewPager = findViewById(com.ominous.tylerutils.R.id.container);
+        indicators = findViewById(com.ominous.tylerutils.R.id.indicators);
 
         this.addFragments();
         this.createIndicators();
@@ -94,19 +93,19 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
         viewPager.setAdapter(onboardingAdapter);
         viewPager.addOnPageChangeListener(this);
-        viewPager.setPageMargin((int) getResources().getDimension(R.dimen.margin_standard));
+        viewPager.setPageMargin((int) getResources().getDimension(com.ominous.tylerutils.R.dimen.margin_standard));
 
-        findViewById(R.id.button_next).setOnClickListener(this);
-        findViewById(R.id.button_finish).setOnClickListener(this);
-        findViewById(android.R.id.content).setBackgroundColor(getResources().getColor(R.color.background_primary));
+        findViewById(com.ominous.tylerutils.R.id.button_next).setOnClickListener(this);
+        findViewById(com.ominous.tylerutils.R.id.button_finish).setOnClickListener(this);
+        findViewById(android.R.id.content).setBackgroundColor(getResources().getColor(com.ominous.tylerutils.R.color.background_primary));
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if (id == R.id.button_next) {
+        if (id == com.ominous.tylerutils.R.id.button_next) {
             viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
-        } else if (id == R.id.button_finish) {
+        } else if (id == com.ominous.tylerutils.R.id.button_finish) {
             if (onboardingAdapter.fragmentContainers.get(viewPager.getCurrentItem()).fragment.canAdvanceToNextFragment()) {
                 for (FragmentContainer fragmentContainer : fragmentContainers) {
                     fragmentContainer.fragment.onFinish();
@@ -143,21 +142,26 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
     }
 
     private void createIndicators() {
-        int marginHalf = (int) getResources().getDimension(R.dimen.margin_half);
+        int marginHalf = (int) getResources().getDimension(com.ominous.tylerutils.R.dimen.margin_half);
         FragmentContainer fragmentContainer;
 
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(marginHalf, marginHalf);
-        if (Build.VERSION.SDK_INT >= 17) {
-            layoutParams.setMarginEnd(marginHalf);
-        } else {
-            layoutParams.setMargins(0,0,marginHalf,0);
-        }
+
 
         for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
             fragmentContainer = fragmentContainers.get(i);
             fragmentContainer.indicator = new ImageView(this);
 
-            fragmentContainer.indicator.setBackgroundResource(R.drawable.indicator_selected);
+            fragmentContainer.indicator.setBackgroundResource(com.ominous.tylerutils.R.drawable.indicator_selected);
+
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(marginHalf, marginHalf);
+
+            if (i+1 < l) {
+                if (Build.VERSION.SDK_INT >= 17) {
+                    layoutParams.setMarginEnd(marginHalf);
+                } else {
+                    layoutParams.setMargins(0, 0, marginHalf, 0);
+                }
+            }
 
             indicators.addView(fragmentContainer.indicator, layoutParams);
         }
@@ -166,9 +170,9 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
     private void updateIndicators(int position) {
         for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
             if (Build.VERSION.SDK_INT >= 21) {
-                fragmentContainers.get(i).indicator.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, i == position ? R.color.text_primary_emphasis : R.color.text_primary_disabled)));
+                fragmentContainers.get(i).indicator.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, i == position ? com.ominous.tylerutils.R.color.text_primary_emphasis : com.ominous.tylerutils.R.color.text_primary_disabled)));
             } else {
-                fragmentContainers.get(i).indicator.getBackground().setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this, i == position ? R.color.text_primary_emphasis : R.color.text_primary_disabled), PorterDuff.Mode.SRC_IN));
+                fragmentContainers.get(i).indicator.getBackground().setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this, i == position ? com.ominous.tylerutils.R.color.text_primary_emphasis : com.ominous.tylerutils.R.color.text_primary_disabled), PorterDuff.Mode.SRC_IN));
             }
         }
     }
