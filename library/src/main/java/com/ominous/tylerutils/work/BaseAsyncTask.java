@@ -7,7 +7,7 @@ import androidx.work.Data;
 
 import java.lang.ref.WeakReference;
 
-public abstract class BaseAsyncTask<T extends GenericWorker> extends AsyncTask<Void,Integer, Data> implements GenericWorker.WorkerFactory<T>  {
+public abstract class BaseAsyncTask<T extends GenericWorker> extends AsyncTask<Void,Integer, GenericResults> implements GenericWorker.WorkerFactory<T>  {
     private WeakReference<T> workerRef;
 
     public BaseAsyncTask(Context context) {
@@ -18,7 +18,7 @@ public abstract class BaseAsyncTask<T extends GenericWorker> extends AsyncTask<V
         workerRef = new WeakReference<>(worker);
     }
 
-    public final Object doWork() throws Throwable {
+    public final GenericResults doWork() throws Throwable {
         GenericWorker worker = workerRef.get();
 
         if (worker == null) {
@@ -35,6 +35,6 @@ public abstract class BaseAsyncTask<T extends GenericWorker> extends AsyncTask<V
             public void onProgress(int progress, int max) {
                 BaseAsyncTask.this.publishProgress(progress,max);
             }
-        }).getResults();
+        });
     }
 }
