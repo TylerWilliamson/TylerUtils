@@ -11,7 +11,11 @@ public abstract class BaseAsyncTask<T extends GenericWorker> extends AsyncTask<V
     private WeakReference<T> workerRef;
 
     public BaseAsyncTask(Context context) {
-        workerRef = new WeakReference<>(getWorker(context));
+        setWorker(getWorker(context));
+    }
+
+    public void setWorker(T worker) {
+        workerRef = new WeakReference<>(worker);
     }
 
     public final Data doWork() throws Throwable {

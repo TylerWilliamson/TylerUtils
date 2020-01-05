@@ -14,7 +14,11 @@ public abstract class BaseWorker<T extends GenericWorker> extends Worker impleme
     public BaseWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
 
-        worker = getWorker(context);
+        setWorker(getWorker(context));
+    }
+
+    public void setWorker(T worker) {
+        this.worker = worker;
     }
 
     @NonNull
