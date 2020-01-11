@@ -17,10 +17,6 @@
             android:layout_height="0dp"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:paddingStart="@dimen/margin_standard"
-            android:paddingTop="?attr/actionBarSize"
-            android:paddingEnd="@dimen/margin_standard"
-            android:paddingBottom="?attr/actionBarSize"
             app:layout_constraintBottom_toTopOf="@id/divider"
             app:layout_constraintTop_toTopOf="parent" />
 
