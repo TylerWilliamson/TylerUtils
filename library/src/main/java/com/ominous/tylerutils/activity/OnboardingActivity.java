@@ -7,11 +7,16 @@ import android.graphics.PorterDuffColorFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ominous.tylerutils.R;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,15 +24,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.viewpager.widget.PagerAdapter;
+import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-
-import com.ominous.tylerutils.R;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class OnboardingActivity extends AppCompatActivity implements View.OnClickListener, ViewPager.OnPageChangeListener {
 
@@ -43,17 +41,28 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
     protected abstract void addFragments();
 
-    public void addFragment(OnboardingFragment fragment) {
-        fragmentContainers.add(new FragmentContainer(fragment));
+    public void addFragment(Class<? extends OnboardingFragment> fragmentClass) {
+        fragmentContainers.add(new FragmentContainer(fragmentClass));
     }
 
     private class FragmentContainer {
         ImageView indicator;
+        Class<? extends OnboardingFragment> fragmentClass;
         OnboardingFragment fragment;
 
-        FragmentContainer(OnboardingFragment fragment) {
-            this.fragment = fragment;
+        FragmentContainer(Class<? extends OnboardingFragment> fragmentClass) {
+            this.fragmentClass = fragmentClass;
         }
+    }
+
+    public List<Fragment> getInstantiatedFragments() {
+        ArrayList<Fragment> fragments = new ArrayList<>();
+
+        for (FragmentContainer container : fragmentContainers) {
+            fragments.add(container.fragment);
+        }
+
+        return fragments;
     }
 
     @Override
@@ -80,10 +89,10 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
         this.setContentView(R.layout.activity_onboarding);
 
-        nextButton = findViewById(com.ominous.tylerutils.R.id.button_next);
-        finishButton = findViewById(com.ominous.tylerutils.R.id.button_finish);
-        viewPager = findViewById(com.ominous.tylerutils.R.id.container);
-        indicators = findViewById(com.ominous.tylerutils.R.id.indicators);
+        nextButton = findViewById(R.id.button_next);
+        finishButton = findViewById(R.id.button_finish);
+        viewPager = findViewById(R.id.container);
+        indicators = findViewById(R.id.indicators);
 
         this.addFragments();
         this.createIndicators();
@@ -93,19 +102,19 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
         viewPager.setAdapter(onboardingAdapter);
         viewPager.addOnPageChangeListener(this);
-        viewPager.setPageMargin((int) getResources().getDimension(com.ominous.tylerutils.R.dimen.margin_standard));
+        viewPager.setPageMargin((int) getResources().getDimension(R.dimen.margin_standard));
 
-        findViewById(com.ominous.tylerutils.R.id.button_next).setOnClickListener(this);
-        findViewById(com.ominous.tylerutils.R.id.button_finish).setOnClickListener(this);
-        findViewById(android.R.id.content).setBackgroundColor(getResources().getColor(com.ominous.tylerutils.R.color.background_primary));
+        findViewById(R.id.button_next).setOnClickListener(this);
+        findViewById(R.id.button_finish).setOnClickListener(this);
+        findViewById(android.R.id.content).setBackgroundColor(getResources().getColor(R.color.background_primary));
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if (id == com.ominous.tylerutils.R.id.button_next) {
+        if (id == R.id.button_next) {
             viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
-        } else if (id == com.ominous.tylerutils.R.id.button_finish) {
+        } else if (id == R.id.button_finish) {
             if (onboardingAdapter.fragmentContainers.get(viewPager.getCurrentItem()).fragment.canAdvanceToNextFragment()) {
                 for (FragmentContainer fragmentContainer : fragmentContainers) {
                     fragmentContainer.fragment.onFinish();
@@ -126,15 +135,17 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         updateIndicators(position);
 
         for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
-            if (i == position) {
-                fragmentContainers.get(i).fragment.onPageSelected();
-            } else {
-                fragmentContainers.get(i).fragment.onPageDeselected();
+            if (fragmentContainers.get(i).fragment != null) {
+                if (i == position) {
+                    fragmentContainers.get(i).fragment.onPageSelected();
+                } else {
+                    fragmentContainers.get(i).fragment.onPageDeselected();
+                }
             }
         }
 
-        nextButton.setVisibility(position != fragmentContainers.size() - 1 && fragmentContainers.get(position).fragment.canAdvanceToNextFragment() ? View.VISIBLE : View.GONE);
-        finishButton.setVisibility(position == (fragmentContainers.size() - 1) && fragmentContainers.get(position).fragment.canAdvanceToNextFragment() ? View.VISIBLE : View.GONE);
+        nextButton.setVisibility(position != fragmentContainers.size() - 1 && fragmentContainers.get(position).fragment != null && fragmentContainers.get(position).fragment.canAdvanceToNextFragment() ? View.VISIBLE : View.GONE);
+        finishButton.setVisibility(position == (fragmentContainers.size() - 1) && fragmentContainers.get(position).fragment != null && fragmentContainers.get(position).fragment.canAdvanceToNextFragment() ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -142,20 +153,19 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
     }
 
     private void createIndicators() {
-        int marginHalf = (int) getResources().getDimension(com.ominous.tylerutils.R.dimen.margin_half);
+        int marginHalf = (int) getResources().getDimension(R.dimen.margin_half);
         FragmentContainer fragmentContainer;
-
 
 
         for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
             fragmentContainer = fragmentContainers.get(i);
             fragmentContainer.indicator = new ImageView(this);
 
-            fragmentContainer.indicator.setBackgroundResource(com.ominous.tylerutils.R.drawable.indicator_selected);
+            fragmentContainer.indicator.setBackgroundResource(R.drawable.indicator_selected);
 
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(marginHalf, marginHalf);
 
-            if (i+1 < l) {
+            if (i + 1 < l) {
                 if (Build.VERSION.SDK_INT >= 17) {
                     layoutParams.setMarginEnd(marginHalf);
                 } else {
@@ -170,9 +180,9 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
     private void updateIndicators(int position) {
         for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
             if (Build.VERSION.SDK_INT >= 21) {
-                fragmentContainers.get(i).indicator.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, i == position ? com.ominous.tylerutils.R.color.text_primary_emphasis : com.ominous.tylerutils.R.color.text_primary_disabled)));
+                fragmentContainers.get(i).indicator.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, i == position ? R.color.text_primary_emphasis : R.color.text_primary_disabled)));
             } else {
-                fragmentContainers.get(i).indicator.getBackground().setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this, i == position ? com.ominous.tylerutils.R.color.text_primary_emphasis : com.ominous.tylerutils.R.color.text_primary_disabled), PorterDuff.Mode.SRC_IN));
+                fragmentContainers.get(i).indicator.getBackground().setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this, i == position ? R.color.text_primary_emphasis : R.color.text_primary_disabled), PorterDuff.Mode.SRC_IN));
             }
         }
     }
@@ -185,51 +195,24 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         onPageSelected(viewPager.getCurrentItem());
     }
 
-    private class OnboardingPagerAdapter extends PagerAdapter {
-        private List<FragmentContainer> fragmentContainers;
-        private FragmentManager fragmentManager;
+    private class OnboardingPagerAdapter extends FragmentPagerAdapter {
+        private FragmentManager fm;
 
-        OnboardingPagerAdapter(FragmentManager fragmentManager, List<FragmentContainer> fragmentContainers) {
-            this.fragmentManager = fragmentManager;
+        private final List<FragmentContainer> fragmentContainers;
+
+        //TODO fix when user tries to resume stopped app
+        public OnboardingPagerAdapter(@NonNull FragmentManager fm, List<FragmentContainer> fragmentContainers) {
+            super(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
             this.fragmentContainers = fragmentContainers;
-        }
-
-        @Override
-        public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-            FragmentTransaction trans = fragmentManager.beginTransaction();
-            trans.remove(fragmentContainers.get(position).fragment);
-            trans.commit();
-            //fragmentContainers.get(position).fragment = null;
+            this.fm = fm;
         }
 
         @NonNull
         @Override
-        public Fragment instantiateItem(@NonNull ViewGroup container, int position) {
-            //TODO This still means there are two Fragments out there. There must be a better way
-            String tag = "fragment:" + position;
-
-            Fragment fragment = fragmentManager.findFragmentByTag(tag);
-            Fragment.SavedState savedInstanceState = null;
-
-            if (fragment != null) {
-                FragmentTransaction trans = fragmentManager.beginTransaction();
-
-                savedInstanceState = fragmentManager.saveFragmentInstanceState(fragment);
-
-                trans.remove(fragment);
-                trans.commit();
-            }
-
-            FragmentTransaction trans = fragmentManager.beginTransaction();
-
-            fragment = fragmentContainers.get(position).fragment;
-            fragment.setInitialSavedState(savedInstanceState);
-
-            trans.add(container.getId(), fragment, tag);
-            trans.commit();
-
-            return fragment;
+        public Fragment getItem(int position) {
+            fragmentContainers.get(position).fragment = (OnboardingFragment) fm.getFragmentFactory().instantiate(getClassLoader(),fragmentContainers.get(position).fragmentClass.getName());
+            return fragmentContainers.get(position).fragment;
         }
 
         @Override
@@ -237,23 +220,13 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
             int count = 1;
 
             for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
-                if (fragmentContainers.get(i).fragment.canAdvanceToNextFragment()) {
+                if (fragmentContainers.get(i).fragment != null && fragmentContainers.get(i).fragment.canAdvanceToNextFragment()) {
                     count++;
                 }
             }
 
-            //for (int i=count,l=fragmentContainers.size();i<l;i++) {
-            //    destroyItem(viewPager,i,fragmentContainers.get(i).fragment);
-            //}
-
             return Math.min(count, fragmentContainers.size());
         }
-
-        @Override
-        public boolean isViewFromObject(@NonNull View view, @NonNull Object o) {
-            return ((Fragment) o).getView() == view;
-        }
-
     }
 
     public static abstract class OnboardingFragment extends Fragment {
@@ -276,13 +249,6 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
         public FragmentActivity getFragmentActivity() {
             return activity.get();
-        }
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            //this.setRetainInstance(true);
         }
 
         @Override
