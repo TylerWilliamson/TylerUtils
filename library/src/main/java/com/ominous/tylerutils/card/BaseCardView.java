@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.listener.RippleTouchListener;
@@ -27,6 +28,10 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
 
         this.setOnClickListener(this);
         this.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        this.setCardBackgroundColor(ContextCompat.getColor(context,R.color.card_background));
+        this.setRadius(getResources().getDimensionPixelSize(R.dimen.margin_quarter));
+        this.setCardElevation(getResources().getDimensionPixelSize(R.dimen.margin_quarter));
 
         if (Build.VERSION.SDK_INT >= 21) {
             this.setForeground(new RippleDrawable(ColorStateList.valueOf(getResources().getColor(R.color.card_background_pressed)), null, getBackground()));
