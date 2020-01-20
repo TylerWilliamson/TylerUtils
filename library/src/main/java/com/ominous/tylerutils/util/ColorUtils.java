@@ -21,7 +21,7 @@ public class ColorUtils {
         AppCompatDelegate.setDefaultNightMode(mode);
     }
 
-    private static int blendColors(int low, int high, double percent) {
+    public static int blendColors(int low, int high, double percent) {
         return Color.argb(
                 255,
                 (int) ((Color.red(low) * (100 - percent) / 100) + (Color.red(high) * percent / 100)),
