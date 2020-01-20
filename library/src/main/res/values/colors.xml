@@ -38,4 +38,5 @@
     <color name="card_background">@color/color_white</color>
     <color name="card_background_pressed">#61CCCCCC</color>
 
+    <color name="snackbar_background">@color/color_grey_30</color>
 </resources>
