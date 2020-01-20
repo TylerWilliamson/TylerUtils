@@ -19,6 +19,7 @@
     <color name="color_grey_42">#FF424242</color>
     <color name="color_grey_30">#FF303030</color>
     <color name="color_grey_21">#FF212121</color>
+    <color name="color_grey_12">#FF121212</color>
 
     <color name="color_black">#FF000000</color>
     <color name="color_black_emphasis">#DE000000</color>
@@ -35,6 +36,6 @@
     <color name="text_primary_disabled">@color/color_black_disabled</color>
 
     <color name="card_background">@color/color_white</color>
-    <color name="card_background_pressed">#61FFFFFF</color>
+    <color name="card_background_pressed">#61CCCCCC</color>
 
 </resources>

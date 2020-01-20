@@ -29,7 +29,7 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
         this.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         if (Build.VERSION.SDK_INT >= 21) {
-            this.setForeground(new RippleDrawable(ColorStateList.valueOf(getResources().getColor(R.color.card_background_pressed)), getForeground(), getBackground()));
+            this.setForeground(new RippleDrawable(ColorStateList.valueOf(getResources().getColor(R.color.card_background_pressed)), null, getBackground()));
             this.setOnTouchListener(new RippleTouchListener());
         }
     }
