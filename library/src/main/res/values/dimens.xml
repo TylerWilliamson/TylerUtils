@@ -11,7 +11,8 @@
     <dimen name="text_size_large">20sp</dimen>
     <dimen name="text_size_xlarge">34sp</dimen>
 
-    <dimen name="elevation_standard">4dp</dimen>
+    <dimen name="card_elevation">1dp</dimen>
+    <dimen name="card_elevation_pressed">8dp</dimen>
 
     <dimen name="fab_size">56dp</dimen>
 </resources>
