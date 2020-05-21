@@ -68,7 +68,7 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
                 }
             }
 
-            return onTouchListener != null && onTouchListener.onTouch(v, event);
+            return onTouchListener == null || onTouchListener.onTouch(v, event);
         });
     }
 
