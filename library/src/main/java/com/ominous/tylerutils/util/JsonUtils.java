@@ -30,7 +30,7 @@ public class JsonUtils {
             JSONFieldName fieldAnnotation = field.getAnnotation(JSONFieldName.class);
             String fieldName = fieldAnnotation == null ? field.getName() : fieldAnnotation.name();
 
-            if (json.has(fieldName)) {
+            if (json.has(fieldName) && !json.isNull(fieldName)) {
                 if (field.getType().isPrimitive() || field.getType().equals(String.class)) {
                     field.set(obj, json.get(fieldName));
                 } else if (field.getType().isArray()) {
