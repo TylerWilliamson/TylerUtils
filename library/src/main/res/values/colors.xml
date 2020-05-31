@@ -10,8 +10,10 @@
     <color name="color_blue">#FF3F51B5</color>
     <color name="color_green">#FF4CAF50</color>
     <color name="color_yellow">#FFFFEB3B</color>
+    <color name="color_orange">#FFFF9800</color>
     <color name="color_red">#FFF44336</color>
     <color name="color_red_dark">#FFB71C1C</color>
+    <color name="color_pink">#FFF48FB1</color>
 
     <color name="color_grey_DF">#FFDFDFDF</color>
     <color name="color_grey_99">#FF999999</color>
