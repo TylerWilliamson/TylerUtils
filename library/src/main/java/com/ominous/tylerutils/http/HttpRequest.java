@@ -1,0 +1,214 @@
+package com.ominous.tylerutils.http;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.os.Build;
+
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.GZIPInputStream;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import androidx.annotation.MainThread;
+
+public class HttpRequest {
+    private static final String UTF8 = "UTF-8";
+    public static final String METHOD_GET = "GET", METHOD_POST = "POST", COMPRESSION_NONE = "none", COMPRESSION_GZIP = "gzip";
+
+    @SuppressWarnings("CharsetObjectCanBeUsed")
+    private static final Charset UTF8Charset = Build.VERSION.SDK_INT >= 19 ? StandardCharsets.UTF_8 : Charset.forName(UTF8);
+    private String url, method = METHOD_GET, compression = COMPRESSION_NONE;
+    private Map<String, String> requestHeaders = new HashMap<>(), bodyParams = new HashMap<>();
+    private Map<String, List<String>> responseHeaders;
+    private HttpURLConnection conn;
+
+    public HttpRequest(String url) {
+        this.url = url;
+    }
+
+    public HttpRequest addHeader(String name, String value) {
+        requestHeaders.put(name, value);
+
+        return this;
+    }
+
+    public HttpRequest addBodyParam(String name, String value) {
+        bodyParams.put(name, value);
+
+        return this;
+    }
+
+    public HttpRequest setMethod(String method) {
+        this.method = method;
+
+        return this;
+    }
+
+    public HttpRequest setCompression(String compressionType) {
+        this.compression = compressionType;
+
+        return this;
+    }
+
+    private InputStream connect() throws HttpException {
+        //This handles HTTPS too
+        try {
+            conn = (HttpURLConnection) new URL(this.url).openConnection();
+            conn.setRequestMethod(this.method);
+
+            for (HashMap.Entry<String, String> entry : this.requestHeaders.entrySet()) {
+                conn.addRequestProperty(entry.getKey(), entry.getValue());
+            }
+
+            if (this.method.equals(METHOD_POST) && this.bodyParams.size() > 0) {
+                StringBuilder body = new StringBuilder();
+
+                for (HashMap.Entry<String, String> entry : this.bodyParams.entrySet()) {
+                    if (body.length() > 0) {
+                        body.append('&');
+                    }
+
+                    body.append(URLEncoder.encode(entry.getKey(), UTF8))
+                            .append('=')
+                            .append(URLEncoder.encode(entry.getValue(), UTF8));
+                }
+
+                try (OutputStream os = conn.getOutputStream();
+                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, UTF8Charset))) {
+                    writer.write(body.toString());
+                    writer.flush();
+                }
+            }
+
+            if (conn.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+                responseHeaders = conn.getHeaderFields();
+
+                return compression.equals(COMPRESSION_GZIP) ? new GZIPInputStream(conn.getInputStream()) : conn.getInputStream();
+            } else {
+                throw new HttpException("HTTP Error: " + conn.getResponseCode() + " " + conn.getResponseMessage());
+            }
+        } catch (MalformedURLException e) {
+            throw new HttpException("Bad URL: " + url, e);
+        } catch (ProtocolException e) {
+            throw new HttpException("Bad Method: " + this.method, e);
+        } catch (UnsupportedEncodingException e) {
+            throw new HttpException("Bad Header", e);
+        } catch (IOException e) {
+            throw new HttpException("Generic Error", e);
+        }
+    }
+
+    private void disconnect() {
+        if (conn != null) {
+            conn.disconnect();
+        }
+    }
+
+    public Map<String, List<String>> getResponseHeaders() {
+        return responseHeaders;
+    }
+
+    public String fetch() throws HttpException, IOException {
+        try (InputStream inputStream = connect();
+             ByteArrayOutputStream result = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[1024]; // 1MB
+            int length;
+
+            while ((length = inputStream.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+
+            return result.toString(UTF8);
+        } finally {
+            this.disconnect();
+        }
+    }
+
+    public Bitmap fetchBitmap() throws HttpException, IOException {
+        try (InputStream inputStream = connect()) {
+            return BitmapFactory.decodeStream(inputStream);
+        } finally {
+            this.disconnect();
+        }
+    }
+
+    public void fetchAsync(RequestListener listener) {
+        new RequestTask(this, listener).execute();
+    }
+
+    public void fetchBitmapAsync(BitmapRequestListener listener) {
+        new RequestTask(this, listener).execute();
+    }
+
+    private static class RequestTask extends AsyncTask<Void, Void, Object> {
+        private HttpRequest httpRequest;
+        private GenericRequestListener listener;
+        private Exception error;
+
+        RequestTask(HttpRequest httpRequest, GenericRequestListener requestListener) {
+            this.httpRequest = httpRequest;
+            this.listener = requestListener;
+        }
+
+        @Override
+        protected Object doInBackground(Void... voids) {
+            try {
+                if (listener instanceof RequestListener) {
+                    return httpRequest.fetch();
+                } else if (listener instanceof BitmapRequestListener) {
+                    return httpRequest.fetchBitmap();
+                } else {
+                    throw new IllegalArgumentException("Invalid request type");
+                }
+            } catch (Exception e) {
+                this.error = e;
+                return null;
+            }
+        }
+
+        @Override
+        @MainThread
+        protected void onPostExecute(Object result) {
+            if (error == null) {
+                if (listener instanceof RequestListener) {
+                    ((RequestListener) listener).onRequestSuccess((String) result);
+                } else if (listener instanceof BitmapRequestListener) {
+                    ((BitmapRequestListener) listener).onRequestSuccess((Bitmap) result);
+                } else {
+                    throw new IllegalArgumentException("Invalid request type");
+                }
+            } else {
+                listener.onRequestFailure(error);
+            }
+        }
+    }
+
+    private interface GenericRequestListener {
+        void onRequestFailure(Exception error);
+    }
+
+    public interface RequestListener extends GenericRequestListener {
+        void onRequestSuccess(String result);
+    }
+
+    public interface BitmapRequestListener extends GenericRequestListener {
+        void onRequestSuccess(Bitmap result);
+    }
+}
