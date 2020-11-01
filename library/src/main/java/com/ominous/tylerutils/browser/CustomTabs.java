@@ -1,5 +1,7 @@
 package com.ominous.tylerutils.browser;
 
+import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,6 +20,7 @@ import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
 import androidx.core.content.ContextCompat;
 
+import com.ominous.tylerutils.BuildConfig;
 import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.util.BitmapUtils;
 import com.ominous.tylerutils.util.ColorUtils;
@@ -25,6 +29,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 public class CustomTabs {
     private static CustomTabs instance = null;
@@ -46,6 +51,8 @@ public class CustomTabs {
     private String customTabsPackageName;
     private long lastLaunch = 0;
     private CustomTabsIntent customTabsIntent;
+
+    private List<ResolveInfo> browserInfoList;
 
     private ArrayList<Uri> likelyUris = new ArrayList<>();
 
@@ -138,22 +145,69 @@ public class CustomTabs {
         if (currentTime - lastLaunch > 300) { //rate limit
             lastLaunch = currentTime;
 
-            Intent urlIntent = new Intent(Intent.ACTION_VIEW).setData(uri);
 
-            String nativePackageName = context.getPackageManager().queryIntentActivities(urlIntent, 0).get(0).activityInfo.packageName;
+            //Try to use native app
+            boolean launched = Build.VERSION.SDK_INT >= 30 ?
+                    launchNative(context, uri) :
+                    launchNativeLegacy(context, uri);
 
-            if (client == null || !customTabsPackageName.equals(nativePackageName)) {
-                context.startActivity(urlIntent);
-            } else {
+            //Otherwise, try a Custom Tab
+            if (!launched) {
                 customTabsIntent.launchUrl(context, uri);
             }
         }
     }
 
+    private boolean launchNative(Context context, Uri uri) {
+        try {
+            context.startActivity(new Intent(Intent.ACTION_VIEW, uri)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                            Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER));
+            return true;
+        } catch (ActivityNotFoundException ex) {
+            return false;
+        }
+    }
+
+    @SuppressLint("QueryPermissionsNeeded")
+    private boolean launchNativeLegacy(Context context, Uri uri) {
+        PackageManager pm = context.getPackageManager();
+
+        if (browserInfoList == null) {
+            browserInfoList = pm.queryIntentActivities(
+                    new Intent()
+                            .setAction(Intent.ACTION_VIEW)
+                            .addCategory(Intent.CATEGORY_BROWSABLE)
+                            .setData(Uri.fromParts("http", "", null)), 0);
+        }
+
+        Intent uriIntent = new Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE);
+
+        boolean found;
+        for (ResolveInfo uriResolveInfo : pm.queryIntentActivities(uriIntent, 0)) {
+            found = false;
+            for (ResolveInfo browserResolveInfo : browserInfoList) {
+                if (uriResolveInfo.resolvePackageName.equals(browserResolveInfo.resolvePackageName)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                // We found native handlers. Launch the Intent.
+                context.startActivity(uriIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static ArrayList<ResolveInfo> getCustomTabsPackages(Context context) {
         PackageManager packageManager = context.getPackageManager();
 
-        Intent activityIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.darksky.net")),
+        Intent activityIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/TylerWilliamson/TylerUtils/")),
                 customTabsIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
 
         ArrayList<ResolveInfo> packagesSupportingCustomTabs = new ArrayList<>();
