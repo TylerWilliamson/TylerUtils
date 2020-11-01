@@ -51,8 +51,8 @@ public abstract class BaseAsyncTask<T extends GenericWorker> implements GenericW
         return taskFuture.cancel(mayInterruptIfRunning);
     }
 
-    public abstract GenericResults doInBackground(Void... voids);
-    public void onPostExecute(GenericResults result) {}
+    protected abstract GenericResults doInBackground(Void... voids);
+    protected void onPostExecute(GenericResults result) {}
 
     public void execute() {
         if (taskFuture == null) {
