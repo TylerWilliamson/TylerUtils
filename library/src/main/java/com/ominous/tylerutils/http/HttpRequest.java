@@ -1,8 +1,8 @@
 package com.ominous.tylerutils.http;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Build;
 
 import java.io.BufferedWriter;
@@ -27,6 +27,11 @@ import java.util.zip.GZIPInputStream;
 import javax.net.ssl.HttpsURLConnection;
 
 import androidx.annotation.MainThread;
+import androidx.work.Data;
+
+import com.ominous.tylerutils.work.BaseAsyncTask;
+import com.ominous.tylerutils.work.GenericResults;
+import com.ominous.tylerutils.work.GenericWorker;
 
 public class HttpRequest {
     private static final String UTF8 = "UTF-8";
@@ -157,45 +162,77 @@ public class HttpRequest {
         new RequestTask(this, listener).execute();
     }
 
-    private static class RequestTask extends AsyncTask<Void, Void, Object> {
-        private HttpRequest httpRequest;
-        private GenericRequestListener listener;
-        private Exception error;
+    private static class HttpResults extends GenericResults<Object> {
+        public HttpResults(Data data, Object results) {
+            super(data, results);
+        }
+    }
 
-        RequestTask(HttpRequest httpRequest, GenericRequestListener requestListener) {
+    private static class HttpRequestWorker extends GenericWorker<HttpResults> {
+        private GenericRequestListener requestListener;
+        private HttpRequest httpRequest;
+
+        public HttpRequestWorker(HttpRequest httpRequest, GenericRequestListener requestListener) {
+            super(null);
+
             this.httpRequest = httpRequest;
-            this.listener = requestListener;
+            this.requestListener = requestListener;
         }
 
         @Override
-        protected Object doInBackground(Void... voids) {
+        public HttpResults doWork(WorkerInterface workerInterface) throws Throwable {
+            if (requestListener instanceof RequestListener) {
+                return new HttpResults(Data.EMPTY,httpRequest.fetch());
+            } else if (requestListener instanceof BitmapRequestListener) {
+                return new HttpResults(Data.EMPTY,httpRequest.fetchBitmap());
+            } else {
+                throw new IllegalArgumentException("Invalid request type");
+            }
+        }
+    }
+
+    private static class RequestTask extends BaseAsyncTask<HttpRequestWorker> {
+        private HttpRequest httpRequest;
+        private GenericRequestListener requestListener;
+        private Exception error;
+
+        RequestTask(HttpRequest httpRequest, GenericRequestListener requestListener) {
+            super(null);
+
+            this.httpRequest = httpRequest;
+            this.requestListener = requestListener;
+
+            setWorker(getWorker(null));
+        }
+
+        @Override
+        public HttpRequestWorker getWorker(Context context) {
+            return new HttpRequestWorker(httpRequest, requestListener);
+        }
+
+        @Override
+        protected HttpResults doInBackground(Void... voids) {
             try {
-                if (listener instanceof RequestListener) {
-                    return httpRequest.fetch();
-                } else if (listener instanceof BitmapRequestListener) {
-                    return httpRequest.fetchBitmap();
-                } else {
-                    throw new IllegalArgumentException("Invalid request type");
-                }
-            } catch (Exception e) {
-                this.error = e;
+                return (HttpResults) doWork();
+            } catch (Throwable e) {
+                this.error = (Exception) e;
                 return null;
             }
         }
 
         @Override
         @MainThread
-        protected void onPostExecute(Object result) {
+        protected void onPostExecute(GenericResults result) {
             if (error == null) {
-                if (listener instanceof RequestListener) {
-                    ((RequestListener) listener).onRequestSuccess((String) result);
-                } else if (listener instanceof BitmapRequestListener) {
-                    ((BitmapRequestListener) listener).onRequestSuccess((Bitmap) result);
+                if (requestListener instanceof RequestListener) {
+                    ((RequestListener) requestListener).onRequestSuccess((String) result.getResults());
+                } else if (requestListener instanceof BitmapRequestListener) {
+                    ((BitmapRequestListener) requestListener).onRequestSuccess((Bitmap) result.getResults());
                 } else {
                     throw new IllegalArgumentException("Invalid request type");
                 }
             } else {
-                listener.onRequestFailure(error);
+                requestListener.onRequestFailure(error);
             }
         }
     }
