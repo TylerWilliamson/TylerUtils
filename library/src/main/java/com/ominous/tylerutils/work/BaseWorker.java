@@ -7,6 +7,7 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+@SuppressWarnings("rawtypes")
 public abstract class BaseWorker<T extends GenericWorker> extends Worker implements GenericWorker.WorkerFactory<T> {
     public static final String KEY_ERROR_MESSAGE = "key_error_message", KEY_STACK_TRACE = "key_stack_trace";
     private T worker;
