@@ -17,7 +17,6 @@ public class RippleTouchListener implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        //noinspection RedundantCast
         Drawable background = v.getBackground(),
                 foreground = v instanceof BaseCardView ? ((BaseCardView) v).getForeground() : null;
 
