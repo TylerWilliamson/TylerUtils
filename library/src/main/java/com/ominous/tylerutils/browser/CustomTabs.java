@@ -170,7 +170,6 @@ public class CustomTabs {
         }
     }
 
-    @SuppressLint("QueryPermissionsNeeded")
     private boolean launchNativeLegacy(Context context, Uri uri) {
         PackageManager pm = context.getPackageManager();
 
@@ -184,17 +183,17 @@ public class CustomTabs {
 
         Intent uriIntent = new Intent(Intent.ACTION_VIEW, uri).addCategory(Intent.CATEGORY_BROWSABLE);
 
-        boolean found;
+        boolean appIsBrowser;
         for (ResolveInfo uriResolveInfo : pm.queryIntentActivities(uriIntent, 0)) {
-            found = false;
+            appIsBrowser = false;
             for (ResolveInfo browserResolveInfo : browserInfoList) {
                 if (uriResolveInfo.resolvePackageName.equals(browserResolveInfo.resolvePackageName)) {
-                    found = true;
+                    appIsBrowser = true;
                     break;
                 }
             }
 
-            if (!found) {
+            if (!appIsBrowser) {
                 // We found native handlers. Launch the Intent.
                 context.startActivity(uriIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 return true;
