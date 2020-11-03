@@ -7,6 +7,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowInsetsController;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,7 +46,7 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         fragmentContainers.add(new FragmentContainer(fragmentClass));
     }
 
-    private class FragmentContainer {
+    private static class FragmentContainer {
         ImageView indicator;
         Class<? extends OnboardingFragment> fragmentClass;
         OnboardingFragment fragment;
@@ -69,25 +70,6 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //TODO WindowInsetsController for API 30
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-
-        if (Build.VERSION.SDK_INT >= 26) {
-            int nightModeFlags =
-                    getResources().getConfiguration().uiMode &
-                            Configuration.UI_MODE_NIGHT_MASK;
-            switch (nightModeFlags) {
-                case Configuration.UI_MODE_NIGHT_YES:
-                    getWindow().getDecorView().setSystemUiVisibility(getWindow().getDecorView().getSystemUiVisibility() & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-                    break;
-
-                case Configuration.UI_MODE_NIGHT_NO:
-                case Configuration.UI_MODE_NIGHT_UNDEFINED:
-                    getWindow().getDecorView().setSystemUiVisibility(getWindow().getDecorView().getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-                    break;
-            }
-        }
-
         this.setContentView(R.layout.activity_onboarding);
 
         nextButton = findViewById(R.id.button_next);
@@ -108,6 +90,36 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         findViewById(R.id.button_next).setOnClickListener(this);
         findViewById(R.id.button_finish).setOnClickListener(this);
         findViewById(android.R.id.content).setBackgroundColor(getResources().getColor(R.color.background_primary));
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        int nightModeFlags =
+                getResources().getConfiguration().uiMode &
+                        Configuration.UI_MODE_NIGHT_MASK;
+
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController wic = getWindow().getInsetsController();
+
+            wic.setSystemBarsAppearance(
+                    nightModeFlags == Configuration.UI_MODE_NIGHT_YES ? 0 :
+                            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS |
+                                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS |
+                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+            if (Build.VERSION.SDK_INT >= 26) {
+                if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+                    getWindow().getDecorView().setSystemUiVisibility(getWindow().getDecorView().getSystemUiVisibility() & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                } else {
+                    getWindow().getDecorView().setSystemUiVisibility(getWindow().getDecorView().getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                }
+            }
+        }
     }
 
     @Override
@@ -212,7 +224,7 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            fragmentContainers.get(position).fragment = (OnboardingFragment) fm.getFragmentFactory().instantiate(getClassLoader(),fragmentContainers.get(position).fragmentClass.getName());
+            fragmentContainers.get(position).fragment = (OnboardingFragment) fm.getFragmentFactory().instantiate(getClassLoader(), fragmentContainers.get(position).fragmentClass.getName());
             return fragmentContainers.get(position).fragment;
         }
 
