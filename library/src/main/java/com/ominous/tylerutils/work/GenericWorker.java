@@ -3,7 +3,6 @@ package com.ominous.tylerutils.work;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
-import androidx.work.Data;
 
 public abstract class GenericWorker<T extends GenericResults> {
     private Context context;

@@ -1,6 +1,5 @@
 package com.ominous.tylerutils.browser;
 
-import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -20,7 +19,6 @@ import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
 import androidx.core.content.ContextCompat;
 
-import com.ominous.tylerutils.BuildConfig;
 import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.util.BitmapUtils;
 import com.ominous.tylerutils.util.ColorUtils;
