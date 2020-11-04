@@ -9,12 +9,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-@SuppressWarnings("rawtypes")
-public abstract class BaseAsyncTask<T extends GenericWorker> implements GenericWorker.WorkerFactory<T>  {
+public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements GenericWorker.WorkerFactory<T>  {
     private WeakReference<T> workerRef;
     private boolean isCancelled;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private Future taskFuture;
+    private Future<?> taskFuture;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     public BaseAsyncTask(Context context) {
@@ -25,8 +24,8 @@ public abstract class BaseAsyncTask<T extends GenericWorker> implements GenericW
         workerRef = new WeakReference<>(worker);
     }
 
-    public final GenericResults doWork() throws Throwable {
-        GenericWorker worker = workerRef.get();
+    public final GenericResults<?> doWork() throws Throwable {
+        GenericWorker<?> worker = workerRef.get();
 
         if (worker == null) {
             throw new Exception("GenericWorker is null");
@@ -51,13 +50,13 @@ public abstract class BaseAsyncTask<T extends GenericWorker> implements GenericW
         return taskFuture.cancel(mayInterruptIfRunning);
     }
 
-    protected abstract GenericResults doInBackground(Void... voids);
-    protected void onPostExecute(GenericResults result) {}
+    protected abstract GenericResults<?> doInBackground(Void... voids);
+    protected void onPostExecute(GenericResults<?> result) {}
 
     public void execute() {
         if (taskFuture == null) {
             taskFuture = executorService.submit(() -> {
-                final GenericResults result = doInBackground();
+                final GenericResults<?> result = doInBackground();
                 handler.post(() -> onPostExecute(result));
             });
         } else {
