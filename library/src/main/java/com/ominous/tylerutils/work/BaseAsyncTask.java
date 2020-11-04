@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 public abstract class BaseAsyncTask<T extends GenericWorker> implements GenericWorker.WorkerFactory<T>  {
     private WeakReference<T> workerRef;
     private boolean isCancelled;
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor(); // change according to your requirements
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private Future taskFuture;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
