@@ -16,6 +16,7 @@ public abstract class SimpleAsyncTask<T,V> {
     abstract protected V doInBackground(T... inputs);
     protected void onPostExecute(V output) {}
 
+    @SuppressWarnings("unchecked")
     public void execute(T... inputs) {
         if (taskFuture == null) {
             taskFuture = executorService.submit(() -> {
@@ -25,5 +26,15 @@ public abstract class SimpleAsyncTask<T,V> {
         } else {
             throw new IllegalStateException("Task already started");
         }
+    }
+
+    public void cancel(boolean mayInterruptIfRunning) {
+        if (taskFuture != null) {
+            taskFuture.cancel(mayInterruptIfRunning);
+        }
+    }
+
+    public boolean isCancelled() {
+        return taskFuture != null && taskFuture.isCancelled();
     }
 }
