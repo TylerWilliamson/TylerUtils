@@ -40,8 +40,8 @@ public class LocaleUtils {
         return !(natural instanceof SimpleDateFormat) || ((SimpleDateFormat) natural).toPattern().indexOf('H') >= 0;
     }
 
-    public static String getPercentageString(Locale locale, double d, int i) {
-        switch (Locale.getDefault().getLanguage()) {
+    public static String getPercentageString(Locale locale, double percentage) {
+        switch (locale.getLanguage()) {
             case "cs":
             case "sk":
             case "fi":
@@ -49,16 +49,16 @@ public class LocaleUtils {
             case "es":
             case "sv":
             case "de":
-                return getDecimalString(locale, d * 100, i) + " %";
+                return getDecimalString(locale,percentage * 100, 0) + " %";
             case "he":
             case "tr":
-                return "%" + getDecimalString(locale, d * 100, i);
+                return "%" + getDecimalString(locale,percentage * 100, 0);
             default:
-                return getDecimalString(locale, d * 100, i) + "%";
+                return getDecimalString(locale,percentage * 100, 0) + "%";
         }
     }
 
-    public static String getDecimalString(Locale locale, double d, int i) {
-        return i == 0 ? Integer.toString((int) d) : String.format(locale, "%." + i + "f", d);
+    public static String getDecimalString(Locale locale, double value, int decimalPlaces) {
+        return decimalPlaces == 0 ? Integer.toString((int) value) : String.format(locale, "%." + decimalPlaces + "f", value);
     }
 }
