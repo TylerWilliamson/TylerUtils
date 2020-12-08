@@ -10,13 +10,16 @@ public class WindowUtils {
 
     public static void setLightNavBar(Window w, boolean enable) {
         if (Build.VERSION.SDK_INT >= 30) {
-            int flags = WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS & WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
             WindowInsetsController controller = w.getInsetsController();
 
             if (controller != null) {
                 controller.setSystemBarsAppearance(
-                        enable ? flags : 0,
-                        flags);
+                        enable ? WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS : 0,
+                        WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
+
+                controller.setSystemBarsAppearance(
+                        enable ? WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS : 0,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
             }
         } else if (Build.VERSION.SDK_INT >= 26) {
             int flags = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
