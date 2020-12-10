@@ -107,13 +107,11 @@ public class HttpRequest {
                 throw new HttpException("HTTP Error: " + conn.getResponseCode() + " " + conn.getResponseMessage());
             }
         } catch (MalformedURLException e) {
-            throw new HttpException("Bad URL: " + url, e);
+            throw new HttpException("HTTP: Bad URL: " + url, e);
         } catch (ProtocolException e) {
-            throw new HttpException("Bad Method: " + this.method, e);
-        } catch (UnsupportedEncodingException e) {
-            throw new HttpException("Bad Header", e);
+            throw new HttpException("HTTP: Bad Method: " + this.method, e);
         } catch (IOException e) {
-            throw new HttpException("Generic Error", e);
+            throw new HttpException("HTTP: I/O Error: " + e.getMessage(), e);
         }
     }
 
