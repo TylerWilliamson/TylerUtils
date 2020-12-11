@@ -6,6 +6,7 @@
     <color name="color_white_regular">#99FFFFFF</color>
     <color name="color_white_disabled">#61FFFFFF</color>
 
+    <color name="color_purple_light">#FF7E57C2</color>
     <color name="color_blue_light">#FF2196F3</color>
     <color name="color_blue">#FF3F51B5</color>
     <color name="color_green">#FF4CAF50</color>
