@@ -87,8 +87,8 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         viewPager.addOnPageChangeListener(this);
         viewPager.setPageMargin((int) getResources().getDimension(R.dimen.margin_standard));
 
-        findViewById(R.id.button_next).setOnClickListener(this);
-        findViewById(R.id.button_finish).setOnClickListener(this);
+        nextButton.setOnClickListener(this);
+        finishButton.setOnClickListener(this);
         findViewById(android.R.id.content).setBackgroundColor(getResources().getColor(R.color.background_primary));
     }
 
@@ -209,8 +209,6 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
     }
 
     private class OnboardingPagerAdapter extends FragmentPagerAdapter {
-        private FragmentManager fm;
-
         private final List<FragmentContainer> fragmentContainers;
 
         //TODO fix when user tries to resume stopped app
@@ -218,13 +216,12 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
             super(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
             this.fragmentContainers = fragmentContainers;
-            this.fm = fm;
         }
 
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            fragmentContainers.get(position).fragment = (OnboardingFragment) fm.getFragmentFactory().instantiate(getClassLoader(), fragmentContainers.get(position).fragmentClass.getName());
+            fragmentContainers.get(position).fragment = (OnboardingFragment) getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), fragmentContainers.get(position).fragmentClass.getName());
             return fragmentContainers.get(position).fragment;
         }
 
@@ -244,7 +241,6 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
     public static abstract class OnboardingFragment extends Fragment {
         private boolean canAdvance = false;
-        private WeakReference<FragmentActivity> activity;
 
         public void notifyViewPager(boolean canAdvance) {
             this.canAdvance = canAdvance;
@@ -259,17 +255,6 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         }
 
         public abstract void onFinish();
-
-        public FragmentActivity getFragmentActivity() {
-            return activity.get();
-        }
-
-        @Override
-        public void onActivityCreated(Bundle bundle) {
-            super.onActivityCreated(bundle);
-
-            this.activity = new WeakReference<>(getActivity());
-        }
 
         public void onPageSelected() { //TODO FragmentLifecycle https://stackoverflow.com/a/33363283
 
