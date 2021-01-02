@@ -33,7 +33,7 @@ public class WindowUtils {
     public static void setImmersive(Window w, boolean enable) {
 
         if (Build.VERSION.SDK_INT >= 30) {
-            w.setDecorFitsSystemWindows(false);
+            w.setDecorFitsSystemWindows(!enable);
             WindowInsetsController controller = w.getInsetsController();
 
             if (controller != null) {
