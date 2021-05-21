@@ -182,8 +182,7 @@ public class CustomTabs {
         try {
             context.startActivity(new Intent(Intent.ACTION_VIEW, uri)
                     .addCategory(Intent.CATEGORY_BROWSABLE)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                            Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER));
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | (Build.VERSION.SDK_INT >= 30 ? Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER : 0)));
             return true;
         } catch (ActivityNotFoundException ex) {
             return false;
