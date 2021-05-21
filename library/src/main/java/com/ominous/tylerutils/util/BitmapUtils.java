@@ -42,8 +42,8 @@ public class BitmapUtils {
         textPaint.setColor(ColorUtils.isColorBright(bitmapColor) ? 0xFF000000 : 0xFFFFFFFF);
         textPaint.setTextSize(textSize);
         textPaint.getTextBounds(letter, 0, 1, textBounds);
-        canvas.drawText(letter, 0, 1, imageSize / 2 + (textBounds.left - textBounds.right) / 2, imageSize / 2
-                + (textBounds.bottom - textBounds.top) / 2, textPaint);
+        canvas.drawText(letter, 0, 1, imageSize / 2f + (textBounds.left - textBounds.right) / 2f, imageSize / 2f
+                + (textBounds.bottom - textBounds.top) / 2f, textPaint);
 
         return bitmap;
     }
@@ -54,7 +54,7 @@ public class BitmapUtils {
 
         Canvas canvas = new Canvas(newBitmap);
         canvas.drawColor(color);
-        canvas.drawBitmap(bitmap, (dim - bitmap.getWidth()) / 2, (dim - bitmap.getHeight()) / 2, null);
+        canvas.drawBitmap(bitmap, (dim - bitmap.getWidth()) / 2f, (dim - bitmap.getHeight()) / 2f, null);
 
         return newBitmap;
     }

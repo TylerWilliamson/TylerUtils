@@ -23,7 +23,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -80,7 +79,7 @@ public class CustomTabs {
 
         ArrayList<ResolveInfo> packages = getCustomTabsPackages(context);
 
-        this.customTabsPackageName = packages == null || packages.size() == 0 ? null : packages.get(0).activityInfo.packageName;
+        this.customTabsPackageName = packages.size() == 0 ? null : packages.get(0).activityInfo.packageName;
 
         this.bind(context);
 

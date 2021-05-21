@@ -23,7 +23,6 @@ import android.os.Build;
 import android.text.Html;
 import android.text.Spanned;
 
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
