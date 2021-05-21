@@ -32,6 +32,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsService;
@@ -124,10 +125,13 @@ public class CustomTabs {
 
     public void setColor(int color) {
         this.customTabsIntent = new CustomTabsIntent.Builder(session)
-                .addDefaultShareMenuItem()
-                .enableUrlBarHiding()
+                .setShareState(CustomTabsIntent.SHARE_STATE_ON)
+                .setUrlBarHidingEnabled(true)
                 .setCloseButtonIcon(getBackArrow(context.get(), ColorUtils.isColorBright(color) ? 0xFF000000 : 0xFFFFFFFF))
-                .setToolbarColor(color)
+                .setDefaultColorSchemeParams(new CustomTabColorSchemeParams.Builder()
+                        .setToolbarColor(color)
+                        .setNavigationBarColor(color)
+                        .build())
                 .setShowTitle(true)
                 .setStartAnimations(context.get(), R.anim.slide_right_in, R.anim.slide_left_out)
                 .setExitAnimations(context.get(), R.anim.slide_left_in, R.anim.slide_right_out)
