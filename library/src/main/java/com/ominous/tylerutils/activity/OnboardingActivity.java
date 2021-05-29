@@ -32,30 +32,32 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.ominous.tylerutils.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ominous.tylerutils.R;
-
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.MarginPageTransformer;
+import androidx.viewpager2.widget.ViewPager2;
 
-public abstract class OnboardingActivity extends AppCompatActivity implements View.OnClickListener, ViewPager.OnPageChangeListener {
+public abstract class OnboardingActivity extends FragmentActivity implements View.OnClickListener {
 
     //TODO fix when canAdvance(true) changes to canAdvance(false)
 
-    private ViewPager viewPager;
+    private ViewPager2 viewPager;
     private ImageButton nextButton;
     private TextView finishButton;
     private LinearLayout indicators;
     private OnboardingPagerAdapter onboardingAdapter;
+    private ViewPager2.OnPageChangeCallback viewPagerCallback;
 
-    private List<FragmentContainer> fragmentContainers = new ArrayList<>();
+    private final List<FragmentContainer> fragmentContainers = new ArrayList<>();
 
     protected abstract void addFragments();
 
@@ -98,11 +100,40 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         this.createIndicators();
         this.updateIndicators(0);
 
-        onboardingAdapter = new OnboardingPagerAdapter(getSupportFragmentManager(), fragmentContainers);
+        onboardingAdapter = new OnboardingPagerAdapter(this, fragmentContainers);
 
         viewPager.setAdapter(onboardingAdapter);
-        viewPager.addOnPageChangeListener(this);
-        viewPager.setPageMargin((int) getResources().getDimension(R.dimen.margin_standard));
+        viewPager.setPageTransformer(new MarginPageTransformer((int) getResources().getDimension(R.dimen.margin_standard)));
+
+        viewPagerCallback = new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                updateIndicators(position);
+
+                for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
+                    if (fragmentContainers.get(i).fragment != null) {
+                        if (i == position) {
+                            fragmentContainers.get(i).fragment.onPageSelected();
+                        } else {
+                            fragmentContainers.get(i).fragment.onPageDeselected();
+                        }
+                    }
+                }
+
+                nextButton.setVisibility(position != fragmentContainers.size() - 1 && fragmentContainers.get(position).fragment != null && fragmentContainers.get(position).fragment.canAdvanceToNextFragment() ? View.VISIBLE : View.GONE);
+                finishButton.setVisibility(position == (fragmentContainers.size() - 1) && fragmentContainers.get(position).fragment != null && fragmentContainers.get(position).fragment.canAdvanceToNextFragment() ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        };
+
+        viewPager.registerOnPageChangeCallback(viewPagerCallback);
 
         nextButton.setOnClickListener(this);
         finishButton.setOnClickListener(this);
@@ -156,36 +187,9 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         }
     }
 
-    @Override
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-    }
-
-    @Override
-    public void onPageSelected(int position) {
-        updateIndicators(position);
-
-        for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
-            if (fragmentContainers.get(i).fragment != null) {
-                if (i == position) {
-                    fragmentContainers.get(i).fragment.onPageSelected();
-                } else {
-                    fragmentContainers.get(i).fragment.onPageDeselected();
-                }
-            }
-        }
-
-        nextButton.setVisibility(position != fragmentContainers.size() - 1 && fragmentContainers.get(position).fragment != null && fragmentContainers.get(position).fragment.canAdvanceToNextFragment() ? View.VISIBLE : View.GONE);
-        finishButton.setVisibility(position == (fragmentContainers.size() - 1) && fragmentContainers.get(position).fragment != null && fragmentContainers.get(position).fragment.canAdvanceToNextFragment() ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void onPageScrollStateChanged(int state) {
-    }
-
     private void createIndicators() {
         int marginHalf = (int) getResources().getDimension(R.dimen.margin_half);
         FragmentContainer fragmentContainer;
-
 
         for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
             fragmentContainer = fragmentContainers.get(i);
@@ -220,30 +224,37 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
     public abstract void onFinish();
 
     private void notifyViewPager() {
-        onboardingAdapter.notifyDataSetChanged();
-
-        onPageSelected(viewPager.getCurrentItem());
+        viewPagerCallback.onPageSelected(viewPager.getCurrentItem());
     }
 
-    private class OnboardingPagerAdapter extends FragmentPagerAdapter {
+    private class OnboardingPagerAdapter extends FragmentStateAdapter {
         private final List<FragmentContainer> fragmentContainers;
+        private final FragmentManager fragmentManager;
 
         //TODO fix when user tries to resume stopped app
-        public OnboardingPagerAdapter(@NonNull FragmentManager fm, List<FragmentContainer> fragmentContainers) {
-            super(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        public OnboardingPagerAdapter(@NonNull FragmentActivity activity, List<FragmentContainer> fragmentContainers) {
+            super(activity);
 
             this.fragmentContainers = fragmentContainers;
+            this.fragmentManager = activity.getSupportFragmentManager();
         }
 
         @NonNull
         @Override
-        public Fragment getItem(int position) {
-            fragmentContainers.get(position).fragment = (OnboardingFragment) getSupportFragmentManager().getFragmentFactory().instantiate(getClassLoader(), fragmentContainers.get(position).fragmentClass.getName());
+        public Fragment createFragment(int position) {
+            if (fragmentContainers.get(position).fragment == null) {
+                try {
+                    fragmentContainers.get(position).fragment = (OnboardingFragment) fragmentManager.getFragmentFactory()
+                            .instantiate(getClassLoader(), fragmentContainers.get(position).fragmentClass.getName());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             return fragmentContainers.get(position).fragment;
         }
 
         @Override
-        public int getCount() {
+        public int getItemCount() {
             int count = 1;
 
             for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
