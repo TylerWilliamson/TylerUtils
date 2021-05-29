@@ -26,8 +26,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class LocaleUtils {
-    private static SimpleDateFormat sdfHour24h = new SimpleDateFormat("H", Locale.US);
-    private static SimpleDateFormat sdfHour12h = new SimpleDateFormat("ha", Locale.US);
+    private static final SimpleDateFormat sdfHour24h = new SimpleDateFormat("H", Locale.US);
+    private static final SimpleDateFormat sdfHour12h = new SimpleDateFormat("ha", Locale.US);
 
     public static String formatHour(Locale locale, Date date, TimeZone timeZone) {
         if (is24HourFormat(locale)) {

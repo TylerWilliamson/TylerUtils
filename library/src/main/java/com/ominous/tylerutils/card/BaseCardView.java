@@ -34,7 +34,7 @@ import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.util.ColorUtils;
 
 public abstract class BaseCardView extends CardView implements View.OnClickListener {
-    private ValueAnimator pressedAnimation;
+    private final ValueAnimator pressedAnimation;
     private OnTouchListener onTouchListener = null;
 
     public BaseCardView(Context context) {
@@ -53,7 +53,7 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
         this.setOnClickListener(this);
         this.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        this.setCardBackgroundColor(ContextCompat.getColor(context,R.color.card_background));
+        this.setCardBackgroundColor(ContextCompat.getColor(context, R.color.card_background));
         this.setRadius(getResources().getDimensionPixelSize(R.dimen.margin_quarter));
         this.setCardElevation(context.getResources().getDimensionPixelSize(R.dimen.card_elevation));
 
@@ -68,23 +68,21 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
             if (ColorUtils.isNightModeActive(getContext())) {
                 BaseCardView.this.setCardBackgroundColor(
                         ColorUtils.blendColors(
-                                ContextCompat.getColor(getContext(),R.color.card_background),
-                                ContextCompat.getColor(getContext(),R.color.card_background_pressed),
+                                ContextCompat.getColor(getContext(), R.color.card_background),
+                                ContextCompat.getColor(getContext(), R.color.card_background_pressed),
                                 animation.getAnimatedFraction() * 100));
             }
         });
 
         super.setOnTouchListener((v, event) -> {
-            if (pressedAnimation != null) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        pressedAnimation.start();
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        v.performClick();
-                    case MotionEvent.ACTION_CANCEL:
-                        pressedAnimation.reverse();
-                }
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    pressedAnimation.start();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    v.performClick();
+                case MotionEvent.ACTION_CANCEL:
+                    pressedAnimation.reverse();
             }
 
             return onTouchListener == null || onTouchListener.onTouch(v, event);

@@ -47,6 +47,7 @@ public class ApiUtils {
     }
 
     //Meta-reflection. Has science gone too far?
+    @SuppressWarnings("rawtypes")
     public static Method getDoubleReflectedMethod(String className, Object instance, String method, Class[] methodArgs) throws InvocationTargetException, IllegalAccessException {
         return (Method) getDeclaredMethod.invoke(forName.invoke(instance, className), method, methodArgs);
     }

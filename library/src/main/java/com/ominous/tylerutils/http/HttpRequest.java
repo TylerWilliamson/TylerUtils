@@ -54,8 +54,11 @@ public class HttpRequest {
 
     @SuppressWarnings("CharsetObjectCanBeUsed")
     private static final Charset UTF8Charset = Build.VERSION.SDK_INT >= 19 ? StandardCharsets.UTF_8 : Charset.forName(UTF8);
-    private String url, method = METHOD_GET, compression = COMPRESSION_NONE;
-    private Map<String, String> requestHeaders = new HashMap<>(), bodyParams = new HashMap<>();
+    private final String url;
+    private String method = METHOD_GET;
+    private String compression = COMPRESSION_NONE;
+    private final Map<String, String> requestHeaders = new HashMap<>();
+    private final Map<String, String> bodyParams = new HashMap<>();
     private Map<String, List<String>> responseHeaders;
     private HttpURLConnection conn;
 
@@ -182,8 +185,8 @@ public class HttpRequest {
     }
 
     private static class RequestTask extends SimpleAsyncTask<HttpRequest,HttpResults> {
-        private HttpRequest httpRequest;
-        private GenericRequestListener requestListener;
+        private final HttpRequest httpRequest;
+        private final GenericRequestListener requestListener;
         private Exception error;
 
         RequestTask(HttpRequest httpRequest, GenericRequestListener requestListener) {

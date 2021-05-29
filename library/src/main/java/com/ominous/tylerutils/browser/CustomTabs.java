@@ -63,16 +63,16 @@ public class CustomTabs {
         }
     };
 
-    private WeakReference<Context> context;
+    private final WeakReference<Context> context;
     private CustomTabsClient client = null;
     private CustomTabsSession session = null;
-    private String customTabsPackageName;
+    private final String customTabsPackageName;
     private long lastLaunch = 0;
     private CustomTabsIntent customTabsIntent;
 
     private List<ResolveInfo> browserInfoList;
 
-    private ArrayList<Uri> likelyUris = new ArrayList<>();
+    private final ArrayList<Uri> likelyUris = new ArrayList<>();
 
     private CustomTabs(Context context) {
         this.context = new WeakReference<>(context);

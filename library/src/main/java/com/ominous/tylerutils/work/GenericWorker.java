@@ -23,13 +23,15 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 public abstract class GenericWorker<T extends GenericResults> {
-    private Context context;
+    private final Context context;
 
     public GenericWorker(Context context) {
         this.context = context;
     }
 
+    @SuppressWarnings("RedundantThrows")
     public abstract T doWork(WorkerInterface workerInterface) throws Throwable;
 
     public interface WorkerInterface {

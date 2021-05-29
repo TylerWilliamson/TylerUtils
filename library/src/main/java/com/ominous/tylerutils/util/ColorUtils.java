@@ -81,9 +81,9 @@ public class ColorUtils {
     }
 
     public static class HSPColor {
-        final static double pR = .299, pG = .587, pB = .114;
-
-        double hue, saturation, perceivedBrightness, alpha;
+        private final static double pR = .299, pG = .587, pB = .114;
+        private final double saturation, alpha, hue;
+        private double perceivedBrightness;
 
         public HSPColor(double hue, double saturation, double perceivedBrightness, double alpha) {
             this.hue = hue;
@@ -96,7 +96,7 @@ public class ColorUtils {
         //http://alienryderflex.com/hsp.html
         public int toRGB() {
             double minOverMax = 1 - saturation;
-            double r, g, b;
+            double r, g, b, hue = this.hue;
             if (minOverMax > 0) {
                 double part;
                 if (hue < 0.166666666666667D) { //R>G>B

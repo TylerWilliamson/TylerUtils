@@ -23,7 +23,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class ParallelThreadManager {
     private static class ParallelThread extends Thread {
-        private CountDownLatch countDownLatch;
+        private final CountDownLatch countDownLatch;
 
         ParallelThread(CountDownLatch countDownLatch, Runnable runnable) {
             super(runnable);

@@ -22,8 +22,8 @@ package com.ominous.tylerutils.work;
 import androidx.work.Data;
 
 public class GenericResults<T> {
-    private Data data;
-    private T results;
+    private final Data data;
+    private final T results;
 
     public GenericResults(Data data, T results) {
         this.data = data;

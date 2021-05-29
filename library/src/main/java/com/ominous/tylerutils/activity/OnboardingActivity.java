@@ -67,7 +67,7 @@ public abstract class OnboardingActivity extends FragmentActivity implements Vie
 
     private static class FragmentContainer {
         ImageView indicator;
-        Class<? extends OnboardingFragment> fragmentClass;
+        final Class<? extends OnboardingFragment> fragmentClass;
         OnboardingFragment fragment;
 
         FragmentContainer(Class<? extends OnboardingFragment> fragmentClass) {
@@ -267,6 +267,7 @@ public abstract class OnboardingActivity extends FragmentActivity implements Vie
         }
     }
 
+    @SuppressWarnings("EmptyMethod")
     public static abstract class OnboardingFragment extends Fragment {
         private boolean canAdvance = false;
 
