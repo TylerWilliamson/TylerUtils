@@ -58,7 +58,7 @@ public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements Gener
 
             @Override
             public void onProgress(int progress, int max) {
-                //BaseAsyncTask.this.publishProgress(progress,max);
+                handler.post(() -> onProgressUpdate(progress, max));
             }
         });
     }
@@ -71,6 +71,7 @@ public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements Gener
 
     protected abstract GenericResults<?> doInBackground(Void... voids);
     protected void onPostExecute(GenericResults<?> result) {}
+    protected void onProgressUpdate(int progress, int max) {}
 
     public void execute() {
         if (taskFuture == null) {
