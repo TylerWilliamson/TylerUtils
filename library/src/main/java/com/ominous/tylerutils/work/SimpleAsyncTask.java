@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public abstract class SimpleAsyncTask<T,V> {
+public abstract class SimpleAsyncTask<T,V> implements ICancelableTask {
     private Future<?> taskFuture;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -52,10 +52,8 @@ public abstract class SimpleAsyncTask<T,V> {
         handler.post(() -> onProgressUpdate(progress, max));
     }
 
-    public final void cancel(boolean mayInterruptIfRunning) {
-        if (taskFuture != null) {
-            taskFuture.cancel(mayInterruptIfRunning);
-        }
+    public final boolean cancel(boolean mayInterruptIfRunning) {
+        return taskFuture != null && taskFuture.cancel(mayInterruptIfRunning);
     }
 
     public final boolean isCancelled() {

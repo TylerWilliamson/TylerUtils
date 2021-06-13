@@ -28,9 +28,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements GenericWorker.WorkerFactory<T>  {
+public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements GenericWorker.WorkerFactory<T>, ICancelableTask  {
     private WeakReference<T> workerRef;
-    private boolean isCancelled;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private Future<?> taskFuture;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -39,7 +38,7 @@ public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements Gener
         setWorker(getWorker(context));
     }
 
-    public void setWorker(T worker) {
+    public final void setWorker(T worker) {
         workerRef = new WeakReference<>(worker);
     }
 
@@ -53,7 +52,7 @@ public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements Gener
         return worker.doWork(new GenericWorker.WorkerInterface() {
             @Override
             public boolean isCancelled() {
-                return BaseAsyncTask.this.isCancelled;
+                return taskFuture != null && taskFuture.isCancelled();
             }
 
             @Override
@@ -63,17 +62,15 @@ public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements Gener
         });
     }
 
-    public boolean cancel(boolean mayInterruptIfRunning) {
-        isCancelled = true;
-
-        return taskFuture.cancel(mayInterruptIfRunning);
+    public final boolean cancel(boolean mayInterruptIfRunning) {
+        return taskFuture != null && taskFuture.cancel(mayInterruptIfRunning);
     }
 
     protected abstract GenericResults<?> doInBackground(Void... voids);
     protected void onPostExecute(GenericResults<?> result) {}
     protected void onProgressUpdate(int progress, int max) {}
 
-    public void execute() {
+    public final void execute() {
         if (taskFuture == null) {
             taskFuture = executorService.submit(() -> {
                 final GenericResults<?> result = doInBackground();
