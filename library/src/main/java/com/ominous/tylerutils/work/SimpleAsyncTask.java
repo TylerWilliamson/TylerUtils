@@ -34,9 +34,10 @@ public abstract class SimpleAsyncTask<T,V> {
     @SuppressWarnings("unchecked") //This is a "Simple" AsyncTask
     abstract protected V doInBackground(T... inputs);
     protected void onPostExecute(V output) {}
+    protected void onProgressUpdate(int progress, int max) {}
 
     @SuppressWarnings("unchecked")
-    public void execute(T... inputs) {
+    public final void execute(T... inputs) {
         if (taskFuture == null) {
             taskFuture = executorService.submit(() -> {
                 final V result = doInBackground(inputs);
@@ -47,13 +48,17 @@ public abstract class SimpleAsyncTask<T,V> {
         }
     }
 
-    public void cancel(boolean mayInterruptIfRunning) {
+    public final void postProgress(int progress, int max) {
+        handler.post(() -> onProgressUpdate(progress, max));
+    }
+
+    public final void cancel(boolean mayInterruptIfRunning) {
         if (taskFuture != null) {
             taskFuture.cancel(mayInterruptIfRunning);
         }
     }
 
-    public boolean isCancelled() {
+    public final boolean isCancelled() {
         return taskFuture != null && taskFuture.isCancelled();
     }
 }
