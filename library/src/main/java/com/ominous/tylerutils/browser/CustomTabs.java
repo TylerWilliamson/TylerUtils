@@ -168,11 +168,16 @@ public class CustomTabs {
         if (currentTime - lastLaunch > 300) { //rate limit
             lastLaunch = currentTime;
 
+            boolean launched;
 
-            //Try to use native app
-            boolean launched = Build.VERSION.SDK_INT >= 30 ?
-                    launchNative(context, uri) :
-                    launchNativeLegacy(context, uri);
+            try {
+                //Try to use native app
+                launched = Build.VERSION.SDK_INT >= 30 ?
+                        launchNative(context, uri) :
+                        launchNativeLegacy(context, uri);
+            } catch (Exception e) {
+                launched = false;
+            }
 
             //Otherwise, try a Custom Tab
             if (!launched) {
@@ -209,7 +214,7 @@ public class CustomTabs {
         for (ResolveInfo uriResolveInfo : pm.queryIntentActivities(uriIntent, 0)) {
             appIsBrowser = false;
             for (ResolveInfo browserResolveInfo : browserInfoList) {
-                if (uriResolveInfo.resolvePackageName.equals(browserResolveInfo.resolvePackageName)) {
+                if (uriResolveInfo.resolvePackageName != null && uriResolveInfo.resolvePackageName.equals(browserResolveInfo.resolvePackageName)) {
                     appIsBrowser = true;
                     break;
                 }
