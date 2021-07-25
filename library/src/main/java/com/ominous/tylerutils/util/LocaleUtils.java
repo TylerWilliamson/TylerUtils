@@ -19,6 +19,9 @@
 
 package com.ominous.tylerutils.util;
 
+import android.content.Context;
+import android.provider.Settings;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,8 +32,8 @@ public class LocaleUtils {
     private static final SimpleDateFormat sdfHour24h = new SimpleDateFormat("H", Locale.US);
     private static final SimpleDateFormat sdfHour12h = new SimpleDateFormat("ha", Locale.US);
 
-    public static String formatHour(Locale locale, Date date, TimeZone timeZone) {
-        if (is24HourFormat(locale)) {
+    public static String formatHour(Context context, Locale locale, Date date, TimeZone timeZone) {
+        if (is24HourFormat(context, locale)) {
             sdfHour24h.setTimeZone(timeZone);
             return sdfHour24h.format(date);
         } else {
@@ -39,11 +42,17 @@ public class LocaleUtils {
         }
     }
 
-    public static String formatDateTime(Locale locale, Date date, TimeZone timeZone) {
+    public static String formatDateTime(Context context, Locale locale, Date date, TimeZone timeZone) {
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG, locale);
 
         if (df instanceof SimpleDateFormat) {
-            SimpleDateFormat sdf = new SimpleDateFormat(((SimpleDateFormat) df).toPattern().replaceAll(":ss", ""), locale);
+            String pattern = ((SimpleDateFormat) df).toPattern().replaceAll(":ss", "");
+
+            if (is24HourFormat(context,locale)) {
+                pattern = pattern.replaceAll(" a","").replaceAll("h","H");
+            }
+
+            SimpleDateFormat sdf = new SimpleDateFormat(pattern, locale);
 
             sdf.setTimeZone(timeZone);
             return sdf.format(date);
@@ -53,9 +62,14 @@ public class LocaleUtils {
         }
     }
 
-    private static boolean is24HourFormat(Locale locale) {
-        DateFormat natural = DateFormat.getTimeInstance(DateFormat.LONG, locale);
+    private static boolean is24HourFormat(Context context, Locale locale) {
+        String overrideLocale24Hour = Settings.System.getString(context.getContentResolver(),Settings.System.TIME_12_24);
 
+        if (overrideLocale24Hour != null) {
+            return overrideLocale24Hour.equals("24");
+        }
+
+        DateFormat natural = DateFormat.getTimeInstance(DateFormat.LONG, locale);
         return !(natural instanceof SimpleDateFormat) || ((SimpleDateFormat) natural).toPattern().indexOf('H') >= 0;
     }
 
