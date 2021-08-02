@@ -20,7 +20,6 @@
 package com.ominous.tylerutils.card;
 
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -45,8 +44,6 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
         this(context, attrs, 0);
     }
 
-    //We call performClick, and the work is purely visual
-    @SuppressLint("ClickableViewAccessibility")
     public BaseCardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, R.style.AppTheme_Card);
 
@@ -74,18 +71,19 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
             }
         });
 
+        //The work is purely visual
+        //noinspection "ClickableViewAccessibility"
         super.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     pressedAnimation.start();
                     break;
                 case MotionEvent.ACTION_UP:
-                    v.performClick();
                 case MotionEvent.ACTION_CANCEL:
                     pressedAnimation.reverse();
             }
 
-            return onTouchListener == null || onTouchListener.onTouch(v, event);
+            return onTouchListener != null && onTouchListener.onTouch(v, event);
         });
     }
 
