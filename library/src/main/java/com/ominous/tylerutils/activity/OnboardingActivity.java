@@ -294,6 +294,10 @@ public abstract class OnboardingActivity extends FragmentActivity implements Vie
         }
     }
 
+    public void setCurrentPage(int page) {
+        viewPager.setCurrentItem(page);
+    }
+
     @Override
     public void onBackPressed() {
         if (viewPager.getCurrentItem() > 0) {
