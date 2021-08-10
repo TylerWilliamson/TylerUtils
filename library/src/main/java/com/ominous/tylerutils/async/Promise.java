@@ -32,14 +32,14 @@ public class Promise<S,T> {
     private final ExecutorService executor = Executors.newCachedThreadPool();
     private final Promise<?,S> parent;
     private final PromiseCallable<S,T> runCallable;
-    private final PromiseCallable<Throwable,Void> catchCallable;
+    private final VoidPromiseCallable<Throwable> catchCallable;
     private final LinkedList<Promise<T,?>> nextList = new LinkedList<>();
     private T result;
     private Future<T> resultFuture;
 
     private PromiseState state = PromiseState.NOT_STARTED;
 
-    private Promise(Promise<?,S> parent,@NonNull PromiseCallable<S,T> runCallable, PromiseCallable<Throwable,Void> catchCallable) {
+    private Promise(Promise<?,S> parent,@NonNull PromiseCallable<S,T> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
         this.parent = parent;
         this.runCallable = runCallable;
         this.catchCallable = catchCallable;
@@ -55,16 +55,36 @@ public class Promise<S,T> {
         return create(runCallable, null);
     }
 
-    public static <U> Promise<Void, U> create(@NonNull PromiseCallable<Void,U> runCallable, PromiseCallable<Throwable,Void> catchCallable) {
+    public static Promise<Void, Void> create(@NonNull VoidPromiseCallable<Void> runCallable) {
+        return create(convertToCallable(runCallable), null);
+    }
+
+    public static <U> Promise<Void, U> create(@NonNull PromiseCallable<Void,U> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
         return new Promise<>(null,runCallable,catchCallable);
     }
 
-    public <U> Promise<T,U> then(@NonNull PromiseCallable<T,U> runCallable) {
-        return then(runCallable,null);
+    public static Promise<Void, Void> create(@NonNull VoidPromiseCallable<Void> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
+        return new Promise<>(null,convertToCallable(runCallable),catchCallable);
     }
 
-    public <U> Promise<T,U> then(@NonNull PromiseCallable<T,U> runCallable, PromiseCallable<Throwable,Void> catchCallable) {
+    public <U> Promise<T,U> then(@NonNull PromiseCallable<T,U> runCallable) {
+        return then(runCallable,(VoidPromiseCallable<Throwable>) null);
+    }
+
+    public Promise<T,Void> then(@NonNull VoidPromiseCallable<T> runCallable) {
+        return then(convertToCallable(runCallable),(VoidPromiseCallable<Throwable>) null);
+    }
+
+    public <U> Promise<T,U> then(@NonNull PromiseCallable<T,U> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
         Promise<T,U> then = new Promise<>(this, runCallable, catchCallable);
+
+        nextList.add(then);
+
+        return then;
+    }
+
+    public Promise<T,Void> then(@NonNull VoidPromiseCallable<T> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
+        Promise<T,Void> then = new Promise<T,Void>(this, convertToCallable(runCallable), catchCallable);
 
         nextList.add(then);
 
@@ -95,7 +115,13 @@ public class Promise<S,T> {
                 state = PromiseState.COMPLETED;
             } catch (ExecutionException e) {
                 if (catchCallable != null) {
-                    executor.submit(() -> catchCallable.call(e.getCause()));
+                    executor.submit(() -> {
+                        try {
+                            catchCallable.call(e.getCause());
+                        } catch (Exception ignored) {
+                            //ignored
+                        }
+                    });
                 }
 
                 state = PromiseState.FAILED;
@@ -148,7 +174,19 @@ public class Promise<S,T> {
         CANCELLED
     }
 
+    private static <U> PromiseCallable<U, Void> convertToCallable(VoidPromiseCallable<U> voidPromiseCallable) {
+        return (a) -> {
+            voidPromiseCallable.call(a);
+
+            return null;
+        };
+    }
+
     public interface PromiseCallable<S,T> {
         T call(S input) throws Exception;
+    }
+
+    public interface VoidPromiseCallable<S> {
+        void call(S input) throws Exception;
     }
 }
