@@ -166,6 +166,10 @@ public class Promise<S,T> {
         return state;
     }
 
+    public T await() throws ExecutionException, InterruptedException {
+        return resultFuture.get();
+    }
+
     public enum PromiseState {
         NOT_STARTED,
         STARTED,
