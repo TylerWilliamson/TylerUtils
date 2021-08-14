@@ -21,6 +21,7 @@ package com.ominous.tylerutils.async;
 
 import java.util.LinkedList;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,6 +35,7 @@ public class Promise<S,T> {
     private final PromiseCallable<S,T> runCallable;
     private final VoidPromiseCallable<Throwable> catchCallable;
     private final LinkedList<Promise<T,?>> nextList = new LinkedList<>();
+    private final CountDownLatch startCountDown = new CountDownLatch(1);
     private T result;
     private Future<T> resultFuture;
 
@@ -108,6 +110,7 @@ public class Promise<S,T> {
             state = PromiseState.STARTED;
 
             resultFuture = executor.submit(() -> runCallable.call(input));
+            startCountDown.countDown();
 
             try {
                 result = resultFuture.get();
@@ -167,6 +170,8 @@ public class Promise<S,T> {
     }
 
     public T await() throws ExecutionException, InterruptedException {
+        startCountDown.await();
+
         return resultFuture.get();
     }
 
