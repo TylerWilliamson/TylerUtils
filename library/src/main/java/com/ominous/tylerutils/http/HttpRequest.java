@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 
+import com.ominous.tylerutils.async.Promise;
 import com.ominous.tylerutils.work.GenericResults;
 import com.ominous.tylerutils.work.SimpleAsyncTask;
 
@@ -170,10 +171,24 @@ public class HttpRequest {
         }
     }
 
+    public Promise<Void,String> fetchAsync() {
+        return Promise.create((a) -> { return fetch(); });
+    }
+
+    public Promise<Void,Bitmap> fetchBitmapAsync() {
+        return Promise.create((a) -> { return fetchBitmap(); });
+    }
+
+    /**
+     * @Deprecated - Use Promise fetchAsync() instead
+     */
     public void fetchAsync(RequestListener listener) {
         new RequestTask(this, listener).execute();
     }
 
+    /**
+     * @Deprecated - Use Promise fetchBitmapAsync() instead
+     */
     public void fetchBitmapAsync(BitmapRequestListener listener) {
         new RequestTask(this, listener).execute();
     }
