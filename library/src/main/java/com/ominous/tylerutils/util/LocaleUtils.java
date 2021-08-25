@@ -24,6 +24,7 @@ import android.provider.Settings;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -31,16 +32,8 @@ import java.util.TimeZone;
 public class LocaleUtils {
     private static final SimpleDateFormat sdfHour24h = new SimpleDateFormat("H", Locale.US);
     private static final SimpleDateFormat sdfHour12h = new SimpleDateFormat("ha", Locale.US);
-
-    public static String formatHour(Context context, Locale locale, Date date, TimeZone timeZone) {
-        if (is24HourFormat(context, locale)) {
-            sdfHour24h.setTimeZone(timeZone);
-            return sdfHour24h.format(date);
-        } else {
-            sdfHour12h.setTimeZone(timeZone);
-            return sdfHour12h.format(date).replaceAll("[mM. ]", "");
-        }
-    }
+    private static final SimpleDateFormat sdfHourLong24h = new SimpleDateFormat("H00", Locale.US);
+    private static final SimpleDateFormat sdfHourLong12h = new SimpleDateFormat("ha", Locale.US);
 
     public static String formatDateTime(Context context, Locale locale, Date date, TimeZone timeZone) {
         DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG, locale);
@@ -60,6 +53,37 @@ public class LocaleUtils {
             df.setTimeZone(timeZone);
             return df.format(date);
         }
+    }
+
+    public static String formatHour(Context context, Locale locale, Date date, TimeZone timeZone) {
+        if (is24HourFormat(context, locale)) {
+            sdfHour24h.setTimeZone(timeZone);
+            return sdfHour24h.format(date);
+        } else {
+            sdfHour12h.setTimeZone(timeZone);
+            return sdfHour12h.format(date).replaceAll("[mM. ]", "");
+        }
+    }
+
+    public static String formatHourLong(Context context, Locale locale, Date date, TimeZone timeZone) {
+        if (is24HourFormat(context, locale)) {
+            sdfHourLong24h.setTimeZone(timeZone);
+            return sdfHourLong24h.format(date);
+        } else {
+            sdfHourLong12h.setTimeZone(timeZone);
+            return sdfHourLong12h.format(date);
+        }
+    }
+
+    public static long getStartOfDay(Date date, TimeZone timeZone) {
+        Calendar calendar = Calendar.getInstance(timeZone);
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        return calendar.getTimeInMillis();
     }
 
     private static boolean is24HourFormat(Context context, Locale locale) {
