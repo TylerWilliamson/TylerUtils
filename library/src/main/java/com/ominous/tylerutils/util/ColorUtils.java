@@ -25,9 +25,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.Build;
 import android.webkit.WebView;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 
 public class ColorUtils {
     public static boolean isNightModeActive(Context context) {
@@ -78,6 +82,23 @@ public class ColorUtils {
         canvas.drawBitmap(bitmap, null, new Rect(0, 0, 1, 1), null);
 
         return newBitmap.getPixel(0, 0);
+    }
+
+    @ColorRes
+    private static int getSystemAccentColorRes() {
+        return Build.VERSION.SDK_INT >= 31 ? android.R.color.system_accent1_200 : 0;
+    }
+
+    @ColorInt
+    public static int getAccentColor(Context context, @ColorRes int defaultColorRes) {
+        return ContextCompat.getColor(context,getAccentColorRes(defaultColorRes));
+    }
+
+    @ColorRes
+    public static int getAccentColorRes(@ColorRes int defaultColorRes) {
+        int systemAccentColor = getSystemAccentColorRes();
+
+        return systemAccentColor != 0 ? systemAccentColor : defaultColorRes;
     }
 
     public static class HSPColor {
