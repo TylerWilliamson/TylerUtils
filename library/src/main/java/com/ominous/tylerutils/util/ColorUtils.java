@@ -19,8 +19,10 @@
 
 package com.ominous.tylerutils.util;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -39,8 +41,9 @@ public class ColorUtils {
     }
 
     public static void setNightMode(Context context) {
-        setNightMode(context,AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        setNightMode(context, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
     }
+
     public static void setNightMode(Context context, int mode) {
         //using a dummy WebView to avoid an Android bug regarding Dark Mode
         new WebView(context);
@@ -57,7 +60,7 @@ public class ColorUtils {
     }
 
     public static int getDarkenedColor(int color) {
-        return adjustBrightness(color,0.75);
+        return adjustBrightness(color, 0.75);
     }
 
     public static boolean isColorBright(int color) {
@@ -90,8 +93,32 @@ public class ColorUtils {
     }
 
     @ColorInt
-    public static int getAccentColor(Context context, @ColorRes int defaultColorRes) {
-        return ContextCompat.getColor(context,getAccentColorRes(defaultColorRes));
+    private static int getAppAccentColor(Context context) {
+        if (Build.VERSION.SDK_INT >= 21) {
+            TypedArray typedArray = context.getTheme()
+                    .obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
+
+            int accentColor = typedArray.getColor(0, 0);
+            typedArray.recycle();
+
+            return accentColor;
+        } else {
+            return 0;
+        }
+    }
+
+    @ColorInt
+    public static int getAccentColor(Context context) {
+        return getAccentColor(context, 0);
+    }
+
+    @ColorInt
+    public static int getAccentColor(Context context, @ColorInt int defaultColor) {
+        int systemAccentColorRes = getSystemAccentColorRes();
+        int systemAccentColor = systemAccentColorRes != 0 ? ContextCompat.getColor(context, systemAccentColorRes) : 0;
+        int appAccentColor = getAppAccentColor(context);
+
+        return systemAccentColor != 0 ? systemAccentColor : appAccentColor != 0 ? appAccentColor : defaultColor;
     }
 
     @ColorRes
@@ -204,7 +231,7 @@ public class ColorUtils {
 
         double h, s, p = Math.sqrt(HSPColor.pR * red * red + HSPColor.pG * green * green + HSPColor.pB * blue * blue);
 
-        if ( Math.abs(red-green) < 0.00001 && Math.abs(red-blue) < 0.00001) {
+        if (Math.abs(red - green) < 0.00001 && Math.abs(red - blue) < 0.00001) {
             return new HSPColor(0, 0, p, alpha);
         }
         if (red >= green && red >= blue) {   //  red is largest
