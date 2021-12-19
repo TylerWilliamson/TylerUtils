@@ -31,7 +31,9 @@ import android.view.View;
 
 import androidx.appcompat.widget.AppCompatTextView;
 
+import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.browser.CustomTabs;
+import com.ominous.tylerutils.util.ColorUtils;
 
 public class LinkedTextView extends AppCompatTextView {
     private CustomTabs customTabs;
@@ -52,6 +54,7 @@ public class LinkedTextView extends AppCompatTextView {
         }
 
         setMovementMethod(LinkMovementMethod.getInstance());
+        setLinkTextColor(ColorUtils.getAccentColor(context, 0));
     }
 
     @Override

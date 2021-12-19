@@ -83,7 +83,7 @@ public class CustomTabs {
 
         this.bind(context);
 
-        this.setColor(0);
+        this.setColor(ColorUtils.getAccentColor(context,0));
     }
 
     public static CustomTabs getInstance(Context context, Uri... likelyUris) {
