@@ -19,8 +19,12 @@
 
 package com.ominous.tylerutils.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Editable;
@@ -33,6 +37,7 @@ import android.widget.TextView;
 import com.google.android.material.snackbar.Snackbar;
 import com.ominous.tylerutils.R;
 
+import java.lang.reflect.Field;
 import java.util.Locale;
 
 import androidx.annotation.ColorInt;
@@ -103,4 +108,65 @@ public class ViewUtils {
 
         return text == null ? "" : text.toString();
     }
+
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    @SuppressLint("DiscouragedPrivateApi")
+    public static void setEditTextCursorColor(EditText editText, int cursorColor) {
+        if (Build.VERSION.SDK_INT >= 29) {
+            Drawable cursor = editText.getTextCursorDrawable();
+            Drawable cursorHandle = editText.getTextSelectHandle();
+            Drawable cursorHandleLeft = editText.getTextSelectHandleLeft();
+            Drawable cursorHandleRight = editText.getTextSelectHandleRight();
+
+            PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
+
+            cursor.setColorFilter(colorFilter);
+            cursorHandle.setColorFilter(colorFilter);
+            cursorHandleLeft.setColorFilter(colorFilter);
+            cursorHandleRight.setColorFilter(colorFilter);
+
+            editText.setTextCursorDrawable(cursor);
+            editText.setTextSelectHandle(cursorHandle);
+            editText.setTextSelectHandleLeft(cursorHandleLeft);
+            editText.setTextSelectHandleRight(cursorHandleRight);
+        } else {
+            try {
+                //TODO: Create Generic methods for reflection
+                Field fCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
+                fCursorDrawableRes.setAccessible(true);
+                int mCursorDrawableRes = fCursorDrawableRes.getInt(editText);
+
+                // Left
+                Field cursorDrawableLeftResField = TextView.class.getDeclaredField("mTextSelectHandleLeftRes");
+                cursorDrawableLeftResField.setAccessible(true);
+                int mCursorDrawableLeftRes = cursorDrawableLeftResField.getInt(editText);
+
+                // Right
+                Field cursorDrawableRightResField = TextView.class.getDeclaredField("mTextSelectHandleRightRes");
+                cursorDrawableRightResField.setAccessible(true);
+                int mCursorDrawableRightRes = cursorDrawableRightResField.getInt(editText);
+
+                Field editorField = TextView.class.getDeclaredField("mEditor");
+                editorField.setAccessible(true);
+                Object editor = editorField.get(editText);
+                Field cursorDrawableField = editor.getClass().getDeclaredField("mCursorDrawable");
+                cursorDrawableField.setAccessible(true);
+
+                Drawable[] drawables = new Drawable[3];
+                Resources res = editText.getContext().getResources();
+                drawables[0] = res.getDrawable(mCursorDrawableRes);
+                drawables[1] = res.getDrawable(mCursorDrawableLeftRes);
+                drawables[2] = res.getDrawable(mCursorDrawableRightRes);
+                drawables[0].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
+                drawables[1].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
+                drawables[2].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
+                cursorDrawableField.set(editor, drawables);
+            } catch (IllegalAccessException e) {
+                //
+            } catch (NoSuchFieldException e) {
+                //
+            }
+        }
+    }
+
 }
