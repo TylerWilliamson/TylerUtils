@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -46,7 +47,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
-public abstract class OnboardingActivity extends FragmentActivity implements View.OnClickListener {
+public abstract class OnboardingActivity extends AppCompatActivity implements View.OnClickListener {
 
     //TODO fix when canAdvance(true) changes to canAdvance(false)
 
@@ -137,7 +138,6 @@ public abstract class OnboardingActivity extends FragmentActivity implements Vie
 
         nextButton.setOnClickListener(this);
         finishButton.setOnClickListener(this);
-        findViewById(android.R.id.content).setBackgroundColor(getResources().getColor(R.color.background_primary));
     }
 
     @Override
