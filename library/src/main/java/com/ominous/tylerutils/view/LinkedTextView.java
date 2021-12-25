@@ -54,7 +54,6 @@ public class LinkedTextView extends AppCompatTextView {
         }
 
         setMovementMethod(LinkMovementMethod.getInstance());
-        setLinkTextColor(ColorUtils.getAccentColor(context, 0));
     }
 
     @Override
