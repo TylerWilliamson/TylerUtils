@@ -70,11 +70,11 @@ public class Promise<S,T> {
     }
 
     public <U> Promise<T,U> then(@NonNull PromiseCallable<T,U> runCallable) {
-        return then(runCallable,(VoidPromiseCallable<Throwable>) null);
+        return then(runCallable,null);
     }
 
     public Promise<T,Void> then(@NonNull VoidPromiseCallable<T> runCallable) {
-        return then(convertToCallable(runCallable),(VoidPromiseCallable<Throwable>) null);
+        return then(convertToCallable(runCallable),null);
     }
 
     public <U> Promise<T,U> then(@NonNull PromiseCallable<T,U> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
@@ -82,13 +82,17 @@ public class Promise<S,T> {
 
         nextList.add(then);
 
+        then.start();
+
         return then;
     }
 
     public Promise<T,Void> then(@NonNull VoidPromiseCallable<T> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
-        Promise<T,Void> then = new Promise<T,Void>(this, convertToCallable(runCallable), catchCallable);
+        Promise<T,Void> then = new Promise<>(this, convertToCallable(runCallable), catchCallable);
 
         nextList.add(then);
+
+        then.start();
 
         return then;
     }
