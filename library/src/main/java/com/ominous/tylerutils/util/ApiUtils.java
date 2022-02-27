@@ -19,6 +19,7 @@
 
 package com.ominous.tylerutils.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -50,5 +51,26 @@ public class ApiUtils {
     @SuppressWarnings("rawtypes")
     public static Method getDoubleReflectedMethod(String className, Object instance, String method, Class[] methodArgs) throws InvocationTargetException, IllegalAccessException {
         return (Method) getDeclaredMethod.invoke(forName.invoke(instance, className), method, methodArgs);
+    }
+
+    public static void setPrivateField(Class<?> c, Object instance, String fieldName, Object value) {
+        try {
+            Field field = c.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(instance, value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Object getPrivateField(Class<?> c, Object instance, String fieldName) {
+        try {
+            Field field = c.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(instance);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
