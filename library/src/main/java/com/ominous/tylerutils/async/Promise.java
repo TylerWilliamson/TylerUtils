@@ -30,7 +30,7 @@ import java.util.concurrent.Future;
 import androidx.annotation.NonNull;
 
 public class Promise<S,T> {
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final static ExecutorService executor = Executors.newCachedThreadPool();
     private final Promise<?,S> parent;
     private final PromiseCallable<S,T> runCallable;
     private final VoidPromiseCallable<Throwable> catchCallable;
