@@ -40,6 +40,7 @@ public class JsonUtils {
         return array;
     }
 
+    //TODO Include other wrapped primitives
     public static <T> T deserialize(Class<T> objClass, JSONObject json)
             throws IllegalAccessException, InstantiationException, JSONException {
 
@@ -50,7 +51,9 @@ public class JsonUtils {
             String fieldName = fieldAnnotation == null ? field.getName() : fieldAnnotation.name();
 
             if (json.has(fieldName) && !json.isNull(fieldName)) {
-                if (field.getType().isPrimitive() || field.getType().equals(String.class)) {
+                if (field.getType().isPrimitive() ||
+                        field.getType().equals(String.class) ||
+                        field.getType().equals(Boolean.class)) {
                     field.set(obj, json.get(fieldName));
                 } else if (field.getType().isArray()) {
                     field.set(obj, deserialize(field.getType().getComponentType(), json.getJSONArray(fieldName)));
