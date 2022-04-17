@@ -29,19 +29,19 @@ import java.util.concurrent.Future;
 
 import androidx.annotation.NonNull;
 
-public class Promise<S,T> {
+public class Promise<S, T> {
     private final static ExecutorService executor = Executors.newCachedThreadPool();
-    private final Promise<?,S> parent;
-    private final PromiseCallable<S,T> runCallable;
+    private final Promise<?, S> parent;
+    private final PromiseCallable<S, T> runCallable;
     private final VoidPromiseCallable<Throwable> catchCallable;
-    private final LinkedList<Promise<T,?>> nextList = new LinkedList<>();
+    private final LinkedList<Promise<T, ?>> nextList = new LinkedList<>();
     private final CountDownLatch startCountDown = new CountDownLatch(1);
     private T result;
     private Future<T> resultFuture;
 
     private PromiseState state = PromiseState.NOT_STARTED;
 
-    private Promise(Promise<?,S> parent,@NonNull PromiseCallable<S,T> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
+    private Promise(Promise<?, S> parent, @NonNull PromiseCallable<S, T> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
         this.parent = parent;
         this.runCallable = runCallable;
         this.catchCallable = catchCallable;
@@ -53,7 +53,7 @@ public class Promise<S,T> {
         return create((a) -> input, null);
     }
 
-    public static <U> Promise<Void, U> create(@NonNull PromiseCallable<Void,U> runCallable) {
+    public static <U> Promise<Void, U> create(@NonNull PromiseCallable<Void, U> runCallable) {
         return create(runCallable, null);
     }
 
@@ -61,24 +61,32 @@ public class Promise<S,T> {
         return create(convertToCallable(runCallable), null);
     }
 
-    public static <U> Promise<Void, U> create(@NonNull PromiseCallable<Void,U> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
-        return new Promise<>(null,runCallable,catchCallable);
+    public static <U> Promise<Void, U> create(@NonNull PromiseCallable<Void, U> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
+        return new Promise<>(null, runCallable, catchCallable);
     }
 
     public static Promise<Void, Void> create(@NonNull VoidPromiseCallable<Void> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
-        return new Promise<>(null,convertToCallable(runCallable),catchCallable);
+        return new Promise<>(null, convertToCallable(runCallable), catchCallable);
     }
 
-    public <U> Promise<T,U> then(@NonNull PromiseCallable<T,U> runCallable) {
-        return then(runCallable,null);
+    private static <U> PromiseCallable<U, Void> convertToCallable(VoidPromiseCallable<U> voidPromiseCallable) {
+        return (a) -> {
+            voidPromiseCallable.call(a);
+
+            return null;
+        };
     }
 
-    public Promise<T,Void> then(@NonNull VoidPromiseCallable<T> runCallable) {
-        return then(convertToCallable(runCallable),null);
+    public <U> Promise<T, U> then(@NonNull PromiseCallable<T, U> runCallable) {
+        return then(runCallable, null);
     }
 
-    public <U> Promise<T,U> then(@NonNull PromiseCallable<T,U> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
-        Promise<T,U> then = new Promise<>(this, runCallable, catchCallable);
+    public Promise<T, Void> then(@NonNull VoidPromiseCallable<T> runCallable) {
+        return then(convertToCallable(runCallable), null);
+    }
+
+    public <U> Promise<T, U> then(@NonNull PromiseCallable<T, U> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
+        Promise<T, U> then = new Promise<>(this, runCallable, catchCallable);
 
         nextList.add(then);
 
@@ -87,8 +95,8 @@ public class Promise<S,T> {
         return then;
     }
 
-    public Promise<T,Void> then(@NonNull VoidPromiseCallable<T> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
-        Promise<T,Void> then = new Promise<>(this, convertToCallable(runCallable), catchCallable);
+    public Promise<T, Void> then(@NonNull VoidPromiseCallable<T> runCallable, VoidPromiseCallable<Throwable> catchCallable) {
+        Promise<T, Void> then = new Promise<>(this, convertToCallable(runCallable), catchCallable);
 
         nextList.add(then);
 
@@ -136,7 +144,7 @@ public class Promise<S,T> {
                 state = PromiseState.CANCELLED;
             }
 
-            for (Promise<T,?> next : nextList) {
+            for (Promise<T, ?> next : nextList) {
                 if (state == PromiseState.COMPLETED) {
                     next.run(result);
                 } else {
@@ -159,7 +167,7 @@ public class Promise<S,T> {
                 parent.cancel(mayInterruptIfRunning);
             }
 
-            for (Promise<T,?> next : nextList) {
+            for (Promise<T, ?> next : nextList) {
                 next.cancel(mayInterruptIfRunning);
             }
         }
@@ -187,15 +195,7 @@ public class Promise<S,T> {
         CANCELLED
     }
 
-    private static <U> PromiseCallable<U, Void> convertToCallable(VoidPromiseCallable<U> voidPromiseCallable) {
-        return (a) -> {
-            voidPromiseCallable.call(a);
-
-            return null;
-        };
-    }
-
-    public interface PromiseCallable<S,T> {
+    public interface PromiseCallable<S, T> {
         T call(S input) throws Exception;
     }
 

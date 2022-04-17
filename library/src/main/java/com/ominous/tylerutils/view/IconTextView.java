@@ -58,7 +58,7 @@ public class IconTextView extends FrameLayout {
     }
 
     private void init() {
-        LayoutInflater.from(getContext()).inflate(R.layout.view_icontextview,this,true);
+        LayoutInflater.from(getContext()).inflate(R.layout.view_icontextview, this, true);
 
         textView = findViewById(R.id.text);
         imageView = findViewById(R.id.icon);

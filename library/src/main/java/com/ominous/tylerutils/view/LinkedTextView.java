@@ -29,11 +29,9 @@ import android.text.style.URLSpan;
 import android.util.AttributeSet;
 import android.view.View;
 
-import androidx.appcompat.widget.AppCompatTextView;
-
-import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.browser.CustomTabs;
-import com.ominous.tylerutils.util.ColorUtils;
+
+import androidx.appcompat.widget.AppCompatTextView;
 
 public class LinkedTextView extends AppCompatTextView {
     private CustomTabs customTabs;
@@ -61,12 +59,12 @@ public class LinkedTextView extends AppCompatTextView {
         SpannedString currentText = new SpannedString(text);
         SpannableString newText = new SpannableString(currentText.toString());
 
-        for (URLSpan span : currentText.getSpans(0,currentText.length(),URLSpan.class)) {
+        for (URLSpan span : currentText.getSpans(0, currentText.length(), URLSpan.class)) {
             if (customTabs == null) {
                 customTabs = CustomTabs.getInstance(getContext());
             }
 
-            newText.setSpan(new CustomTabsURLSpan(customTabs, span.getURL()),currentText.getSpanStart(span),currentText.getSpanEnd(span), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            newText.setSpan(new CustomTabsURLSpan(customTabs, span.getURL()), currentText.getSpanStart(span), currentText.getSpanEnd(span), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         super.setText(newText, type);

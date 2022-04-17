@@ -24,6 +24,7 @@ import com.ominous.tylerutils.annotation.JSONFieldName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 

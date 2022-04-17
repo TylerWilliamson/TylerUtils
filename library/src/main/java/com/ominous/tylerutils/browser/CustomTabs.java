@@ -30,15 +30,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.browser.customtabs.CustomTabColorSchemeParams;
-import androidx.browser.customtabs.CustomTabsClient;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsService;
-import androidx.browser.customtabs.CustomTabsServiceConnection;
-import androidx.browser.customtabs.CustomTabsSession;
-import androidx.core.content.ContextCompat;
-
 import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.util.BitmapUtils;
 import com.ominous.tylerutils.util.ColorUtils;
@@ -48,6 +39,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.browser.customtabs.CustomTabColorSchemeParams;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsService;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
+import androidx.core.content.ContextCompat;
 
 public class CustomTabs {
     private static CustomTabs instance = null;
@@ -64,15 +64,13 @@ public class CustomTabs {
     };
 
     private final WeakReference<Context> context;
+    private final String customTabsPackageName;
+    private final ArrayList<Uri> likelyUris = new ArrayList<>();
     private CustomTabsClient client = null;
     private CustomTabsSession session = null;
-    private final String customTabsPackageName;
     private long lastLaunch = 0;
     private CustomTabsIntent customTabsIntent;
-
     private List<ResolveInfo> browserInfoList;
-
-    private final ArrayList<Uri> likelyUris = new ArrayList<>();
 
     private CustomTabs(Context context) {
         this.context = new WeakReference<>(context);
@@ -83,7 +81,7 @@ public class CustomTabs {
 
         this.bind(context);
 
-        this.setColor(ColorUtils.getAccentColor(context,0));
+        this.setColor(ColorUtils.getAccentColor(context, 0));
     }
 
     public static CustomTabs getInstance(Context context, Uri... likelyUris) {
@@ -94,6 +92,26 @@ public class CustomTabs {
         instance.addLikelyUris(likelyUris);
 
         return instance;
+    }
+
+    private static ArrayList<ResolveInfo> getCustomTabsPackages(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+
+        Intent activityIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/TylerWilliamson/TylerUtils/")),
+                customTabsIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
+
+        ArrayList<ResolveInfo> packagesSupportingCustomTabs = new ArrayList<>();
+        for (ResolveInfo info : packageManager.queryIntentActivities(activityIntent, 0)) {
+            if (packageManager.resolveService(customTabsIntent.setPackage(info.activityInfo.packageName), 0) != null) {
+                packagesSupportingCustomTabs.add(info);
+            }
+        }
+
+        return packagesSupportingCustomTabs;
+    }
+
+    private static Bitmap getBackArrow(Context context, int color) {
+        return BitmapUtils.drawableToBitmap(ContextCompat.getDrawable(context, R.drawable.ic_arrow_back_white_24dp), color);
     }
 
     private void bind(Context context) {
@@ -228,25 +246,5 @@ public class CustomTabs {
         }
 
         return false;
-    }
-
-    private static ArrayList<ResolveInfo> getCustomTabsPackages(Context context) {
-        PackageManager packageManager = context.getPackageManager();
-
-        Intent activityIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/TylerWilliamson/TylerUtils/")),
-                customTabsIntent = new Intent(CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION);
-
-        ArrayList<ResolveInfo> packagesSupportingCustomTabs = new ArrayList<>();
-        for (ResolveInfo info : packageManager.queryIntentActivities(activityIntent, 0)) {
-            if (packageManager.resolveService(customTabsIntent.setPackage(info.activityInfo.packageName), 0) != null) {
-                packagesSupportingCustomTabs.add(info);
-            }
-        }
-
-        return packagesSupportingCustomTabs;
-    }
-
-    private static Bitmap getBackArrow(Context context, int color) {
-        return BitmapUtils.drawableToBitmap(ContextCompat.getDrawable(context, R.drawable.ic_arrow_back_white_24dp), color);
     }
 }

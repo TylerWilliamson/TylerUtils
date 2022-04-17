@@ -26,11 +26,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.cardview.widget.CardView;
-import androidx.core.content.ContextCompat;
-
 import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.util.ColorUtils;
+
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 public abstract class BaseCardView extends CardView implements View.OnClickListener {
     private final ValueAnimator pressedAnimation;

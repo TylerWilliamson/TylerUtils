@@ -50,16 +50,15 @@ import javax.net.ssl.HttpsURLConnection;
 import androidx.work.Data;
 
 public class HttpRequest {
-    private static final String UTF8 = "UTF-8";
     public static final String METHOD_GET = "GET", METHOD_POST = "POST", COMPRESSION_NONE = "none", COMPRESSION_GZIP = "gzip";
-
+    private static final String UTF8 = "UTF-8";
     @SuppressWarnings("CharsetObjectCanBeUsed")
     private static final Charset UTF8Charset = Build.VERSION.SDK_INT >= 19 ? StandardCharsets.UTF_8 : Charset.forName(UTF8);
     private final String url;
-    private String method = METHOD_GET;
-    private String compression = COMPRESSION_NONE;
     private final Map<String, String> requestHeaders = new HashMap<>();
     private final Map<String, String> bodyParams = new HashMap<>();
+    private String method = METHOD_GET;
+    private String compression = COMPRESSION_NONE;
     private Map<String, List<String>> responseHeaders;
     private HttpURLConnection conn;
 
@@ -171,12 +170,16 @@ public class HttpRequest {
         }
     }
 
-    public Promise<Void,String> fetchAsync() {
-        return Promise.create((a) -> { return fetch(); });
+    public Promise<Void, String> fetchAsync() {
+        return Promise.create((a) -> {
+            return fetch();
+        });
     }
 
-    public Promise<Void,Bitmap> fetchBitmapAsync() {
-        return Promise.create((a) -> { return fetchBitmap(); });
+    public Promise<Void, Bitmap> fetchBitmapAsync() {
+        return Promise.create((a) -> {
+            return fetchBitmap();
+        });
     }
 
     /**
@@ -193,13 +196,25 @@ public class HttpRequest {
         new RequestTask(this, listener).execute();
     }
 
+    private interface GenericRequestListener {
+        void onRequestFailure(Exception error);
+    }
+
+    public interface RequestListener extends GenericRequestListener {
+        void onRequestSuccess(String result);
+    }
+
+    public interface BitmapRequestListener extends GenericRequestListener {
+        void onRequestSuccess(Bitmap result);
+    }
+
     private static class HttpResults extends GenericResults<Object> {
         public HttpResults(Data data, Object results) {
             super(data, results);
         }
     }
 
-    private static class RequestTask extends SimpleAsyncTask<HttpRequest,HttpResults> {
+    private static class RequestTask extends SimpleAsyncTask<HttpRequest, HttpResults> {
         private final HttpRequest httpRequest;
         private final GenericRequestListener requestListener;
         private Exception error;
@@ -240,17 +255,5 @@ public class HttpRequest {
                 requestListener.onRequestFailure(error);
             }
         }
-    }
-
-    private interface GenericRequestListener {
-        void onRequestFailure(Exception error);
-    }
-
-    public interface RequestListener extends GenericRequestListener {
-        void onRequestSuccess(String result);
-    }
-
-    public interface BitmapRequestListener extends GenericRequestListener {
-        void onRequestSuccess(Bitmap result);
     }
 }

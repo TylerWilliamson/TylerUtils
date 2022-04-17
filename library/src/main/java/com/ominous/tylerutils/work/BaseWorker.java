@@ -46,7 +46,7 @@ public abstract class BaseWorker<T extends GenericWorker> extends Worker impleme
     public Result doWork() {
         try {
             if (worker == null) {
-                return Result.failure(new Data.Builder().putString(KEY_ERROR_MESSAGE,"GenericWorker is null").build());
+                return Result.failure(new Data.Builder().putString(KEY_ERROR_MESSAGE, "GenericWorker is null").build());
             } else {
                 return Result.success(worker.doWork(new GenericWorker.WorkerInterface() {
                     @Override
@@ -67,7 +67,7 @@ public abstract class BaseWorker<T extends GenericWorker> extends Worker impleme
                 stackTrace.append(ste.toString()).append('\n');
             }
 
-            return Result.failure(new Data.Builder().putString(KEY_ERROR_MESSAGE,t.getMessage()).putString(KEY_STACK_TRACE,stackTrace.toString()).build());
+            return Result.failure(new Data.Builder().putString(KEY_ERROR_MESSAGE, t.getMessage()).putString(KEY_STACK_TRACE, stackTrace.toString()).build());
         }
     }
 }

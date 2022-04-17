@@ -51,6 +51,7 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
     //TODO fix when canAdvance(true) changes to canAdvance(false)
 
+    private final List<FragmentContainer> fragmentContainers = new ArrayList<>();
     private ViewPager2 viewPager;
     private ImageButton nextButton;
     private TextView finishButton;
@@ -58,22 +59,10 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
     private OnboardingPagerAdapter onboardingAdapter;
     private ViewPager2.OnPageChangeCallback viewPagerCallback;
 
-    private final List<FragmentContainer> fragmentContainers = new ArrayList<>();
-
     protected abstract void addFragments();
 
     public void addFragment(Class<? extends OnboardingFragment> fragmentClass) {
         fragmentContainers.add(new FragmentContainer(fragmentClass));
-    }
-
-    private static class FragmentContainer {
-        ImageView indicator;
-        final Class<? extends OnboardingFragment> fragmentClass;
-        OnboardingFragment fragment;
-
-        FragmentContainer(Class<? extends OnboardingFragment> fragmentClass) {
-            this.fragmentClass = fragmentClass;
-        }
     }
 
     public List<Fragment> getInstantiatedFragments() {
@@ -227,6 +216,56 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         viewPagerCallback.onPageSelected(viewPager.getCurrentItem());
     }
 
+    public void setCurrentPage(int page) {
+        viewPager.setCurrentItem(page);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (viewPager.getCurrentItem() > 0) {
+            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    private static class FragmentContainer {
+        final Class<? extends OnboardingFragment> fragmentClass;
+        ImageView indicator;
+        OnboardingFragment fragment;
+
+        FragmentContainer(Class<? extends OnboardingFragment> fragmentClass) {
+            this.fragmentClass = fragmentClass;
+        }
+    }
+
+    @SuppressWarnings("EmptyMethod")
+    public static abstract class OnboardingFragment extends Fragment {
+        private boolean canAdvance = false;
+
+        public void notifyViewPager(boolean canAdvance) {
+            this.canAdvance = canAdvance;
+
+            if (this.getActivity() != null) {
+                ((OnboardingActivity) this.getActivity()).notifyViewPager();
+            }
+        }
+
+        private boolean canAdvanceToNextFragment() {
+            return canAdvance;
+        }
+
+        public abstract void onFinish();
+
+        public void onPageSelected() { //TODO FragmentLifecycle https://stackoverflow.com/a/33363283
+
+        }
+
+        public void onPageDeselected() {
+
+        }
+    }
+
     private class OnboardingPagerAdapter extends FragmentStateAdapter {
         private final List<FragmentContainer> fragmentContainers;
         private final FragmentManager fragmentManager;
@@ -264,46 +303,6 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
             }
 
             return Math.min(count, fragmentContainers.size());
-        }
-    }
-
-    @SuppressWarnings("EmptyMethod")
-    public static abstract class OnboardingFragment extends Fragment {
-        private boolean canAdvance = false;
-
-        public void notifyViewPager(boolean canAdvance) {
-            this.canAdvance = canAdvance;
-
-            if (this.getActivity() != null) {
-                ((OnboardingActivity) this.getActivity()).notifyViewPager();
-            }
-        }
-
-        private boolean canAdvanceToNextFragment() {
-            return canAdvance;
-        }
-
-        public abstract void onFinish();
-
-        public void onPageSelected() { //TODO FragmentLifecycle https://stackoverflow.com/a/33363283
-
-        }
-
-        public void onPageDeselected() {
-
-        }
-    }
-
-    public void setCurrentPage(int page) {
-        viewPager.setCurrentItem(page);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (viewPager.getCurrentItem() > 0) {
-            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
-        } else {
-            super.onBackPressed();
         }
     }
 }

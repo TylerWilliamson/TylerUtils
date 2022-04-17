@@ -28,11 +28,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements GenericWorker.WorkerFactory<T>, ICancelableTask  {
-    private WeakReference<T> workerRef;
+public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements GenericWorker.WorkerFactory<T>, ICancelableTask {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private Future<?> taskFuture;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private WeakReference<T> workerRef;
+    private Future<?> taskFuture;
 
     public BaseAsyncTask(Context context) {
         setWorker(getWorker(context));
@@ -67,8 +67,12 @@ public abstract class BaseAsyncTask<T extends GenericWorker<?>> implements Gener
     }
 
     protected abstract GenericResults<?> doInBackground(Void... voids);
-    protected void onPostExecute(GenericResults<?> result) {}
-    protected void onProgressUpdate(int progress, int max) {}
+
+    protected void onPostExecute(GenericResults<?> result) {
+    }
+
+    protected void onProgressUpdate(int progress, int max) {
+    }
 
     public final void execute() {
         if (taskFuture == null) {

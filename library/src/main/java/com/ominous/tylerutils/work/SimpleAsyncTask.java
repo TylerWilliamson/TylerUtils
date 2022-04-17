@@ -26,15 +26,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public abstract class SimpleAsyncTask<T,V> implements ICancelableTask {
-    private Future<?> taskFuture;
+public abstract class SimpleAsyncTask<T, V> implements ICancelableTask {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private Future<?> taskFuture;
 
     @SuppressWarnings("unchecked") //This is a "Simple" AsyncTask
     abstract protected V doInBackground(T... inputs);
-    protected void onPostExecute(V output) {}
-    protected void onProgressUpdate(int progress, int max) {}
+
+    protected void onPostExecute(V output) {
+    }
+
+    protected void onProgressUpdate(int progress, int max) {
+    }
 
     @SuppressWarnings("unchecked")
     public final void execute(T... inputs) {

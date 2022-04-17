@@ -24,9 +24,9 @@ import android.graphics.drawable.RippleDrawable;
 import android.view.MotionEvent;
 import android.view.View;
 
-import androidx.annotation.RequiresApi;
-
 import com.ominous.tylerutils.card.BaseCardView;
+
+import androidx.annotation.RequiresApi;
 
 @RequiresApi(api = 21)
 public class RippleTouchListener implements View.OnTouchListener {

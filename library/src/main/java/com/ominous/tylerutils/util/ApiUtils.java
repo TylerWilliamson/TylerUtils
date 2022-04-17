@@ -40,10 +40,10 @@ public class ApiUtils {
     //https://github.com/tiann/FreeReflection/blob/master/library/src/main/java/me/weishu/reflection/Reflection.java
     public static void enableDarkGreylistedApis(String... methods) throws InvocationTargetException, IllegalAccessException {
         //dalvik.system.VMRuntime sVmRuntime = dalvik.system.VMRuntime.getRuntime();
-        Object sVmRuntime = getDoubleReflectedMethod("dalvik.system.VMRuntime",null,"getRuntime", null).invoke(null);
+        Object sVmRuntime = getDoubleReflectedMethod("dalvik.system.VMRuntime", null, "getRuntime", null).invoke(null);
 
         //sVmRuntime.setHiddenApiExemptions(new Object[]{methods})
-        getDoubleReflectedMethod("dalvik.system.VMRuntime",sVmRuntime,"setHiddenApiExemptions", new Class[]{String[].class})
+        getDoubleReflectedMethod("dalvik.system.VMRuntime", sVmRuntime, "setHiddenApiExemptions", new Class[]{String[].class})
                 .invoke(sVmRuntime, new Object[]{methods});
     }
 

@@ -35,6 +35,10 @@ public class GithubUtils {
     private final static String githubApiUri = "https://api.github.com/repos/%1$s/%2$s/%3$s";
     private final static String githubUri = "https://github.com/%1$s/%2$s/%3$s";
 
+    public static GitHubRepo getRepo(String user, String repo) {
+        return new GitHubRepo(user, repo);
+    }
+
     public static class GitHubRepo {
         private final String user;
         private final String repo;
@@ -123,10 +127,6 @@ public class GithubUtils {
         public String body;
         public boolean draft;
         public String published_at;
-    }
-
-    public static GitHubRepo getRepo(String user, String repo) {
-        return new GitHubRepo(user, repo);
     }
 
     public static class GithubException extends Exception {

@@ -22,7 +22,6 @@ package com.ominous.tylerutils.util;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -52,14 +51,14 @@ public class ViewUtils {
         Context context = view.getContext();
 
         return Snackbar
-                .make(view,text,duration)
-                .setTextColor(ContextCompat.getColor(context,R.color.color_white_regular))
-                .setActionTextColor(ContextCompat.getColor(context,R.color.color_white))
+                .make(view, text, duration)
+                .setTextColor(ContextCompat.getColor(context, R.color.color_white_regular))
+                .setActionTextColor(ContextCompat.getColor(context, R.color.color_white))
                 .setBackgroundTint(ContextCompat.getColor(context, R.color.snackbar_background));
     }
 
     public static Snackbar makeSnackbar(View view, @StringRes int textResId, int duration) {
-        return makeSnackbar(view,view.getContext().getString(textResId),duration);
+        return makeSnackbar(view, view.getContext().getString(textResId), duration);
     }
 
     //Setting DrawableStart in XML does not work for Vectors
@@ -68,7 +67,7 @@ public class ViewUtils {
                 drawableEnd,
                 drawableTop,
                 drawableBottom,
-                drawable = ContextCompat.getDrawable(textview.getContext(),drawableRes);
+                drawable = ContextCompat.getDrawable(textview.getContext(), drawableRes);
 
         if (drawable != null) {
             int size = (int) textview.getTextSize();
@@ -84,15 +83,15 @@ public class ViewUtils {
             drawableBottom = ((flagSide & FLAG_BOTTOM) > 0) ? drawable : currentDrawables[3];
 
             if (Build.VERSION.SDK_INT > 17 && TextUtils.getLayoutDirectionFromLocale(Locale.getDefault()) == View.LAYOUT_DIRECTION_RTL) {
-                textview.setCompoundDrawables(drawableEnd,drawableTop,drawableStart,drawableBottom);
+                textview.setCompoundDrawables(drawableEnd, drawableTop, drawableStart, drawableBottom);
             } else {
-                textview.setCompoundDrawables(drawableStart,drawableTop,drawableEnd,drawableBottom);
+                textview.setCompoundDrawables(drawableStart, drawableTop, drawableEnd, drawableBottom);
             }
         }
     }
 
     public static void toggleKeyboardState(View v, boolean open) {
-        InputMethodManager inputMethodManager = ContextCompat.getSystemService(v.getContext(),InputMethodManager.class);
+        InputMethodManager inputMethodManager = ContextCompat.getSystemService(v.getContext(), InputMethodManager.class);
 
         if (inputMethodManager != null) {
             if (open) {

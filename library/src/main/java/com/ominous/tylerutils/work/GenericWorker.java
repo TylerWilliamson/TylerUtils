@@ -34,17 +34,18 @@ public abstract class GenericWorker<T extends GenericResults> {
     @SuppressWarnings("RedundantThrows")
     public abstract T doWork(WorkerInterface workerInterface) throws Throwable;
 
+    public Context getContext() {
+        return context;
+    }
+
     public interface WorkerInterface {
         boolean isCancelled();
+
         void onProgress(int progress, int max);
     }
 
-    public interface WorkerFactory <T extends GenericWorker> {
+    public interface WorkerFactory<T extends GenericWorker> {
         @Nullable
         T getWorker(Context context);
-    }
-
-    public Context getContext() {
-        return context;
     }
 }

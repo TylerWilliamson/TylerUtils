@@ -43,7 +43,7 @@ public class ApkUtils {
             Signature[] signatures = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_SIGNATURES).signatures;
             String[] signatureStrings = new String[signatures.length];
 
-            for (int i=0,l= signatures.length;i<l;i++) {
+            for (int i = 0, l = signatures.length; i < l; i++) {
                 signatureStrings[i] = signatures[i].toCharsString();
             }
 

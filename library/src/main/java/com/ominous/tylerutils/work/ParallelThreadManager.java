@@ -22,6 +22,16 @@ package com.ominous.tylerutils.work;
 import java.util.concurrent.CountDownLatch;
 
 public class ParallelThreadManager {
+    public static void execute(Runnable... runnables) throws InterruptedException {
+        CountDownLatch countDownLatch = new CountDownLatch(runnables.length);
+
+        for (Runnable runnable : runnables) {
+            new ParallelThread(countDownLatch, runnable).start();
+        }
+
+        countDownLatch.await();
+    }
+
     private static class ParallelThread extends Thread {
         private final CountDownLatch countDownLatch;
 
@@ -36,15 +46,5 @@ public class ParallelThreadManager {
 
             countDownLatch.countDown();
         }
-    }
-
-    public static void execute(Runnable... runnables) throws InterruptedException {
-        CountDownLatch countDownLatch = new CountDownLatch(runnables.length);
-
-        for(Runnable runnable : runnables) {
-            new ParallelThread(countDownLatch,runnable).start();
-        }
-
-        countDownLatch.await();
     }
 }

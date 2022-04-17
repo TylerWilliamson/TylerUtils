@@ -22,9 +22,9 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/coordinator_layout"
-    android:background="@color/background_primary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background_primary"
     android:fitsSystemWindows="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -51,12 +51,12 @@
             app:layout_constraintTop_toBottomOf="@id/container" />
 
         <FrameLayout
-            app:layout_constraintTop_toBottomOf="@id/divider"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:id="@+id/navigation"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider">
 
             <LinearLayout
                 android:id="@+id/indicators"

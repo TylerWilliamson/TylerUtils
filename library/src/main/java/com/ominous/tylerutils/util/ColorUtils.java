@@ -19,7 +19,6 @@
 
 package com.ominous.tylerutils.util;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -128,6 +127,48 @@ public class ColorUtils {
         return systemAccentColor != 0 ? systemAccentColor : defaultColorRes;
     }
 
+    //Based on public domain function by Darel Rex Finley, 2006
+    //http://alienryderflex.com/hsp.html
+    public static HSPColor RGBtoHSP(int color) {
+        double red = Color.red(color) / 255.0;
+        double green = Color.green(color) / 255.0;
+        double blue = Color.blue(color) / 255.0;
+        double alpha = Color.alpha(color) / 255.0;
+
+        double h, s, p = Math.sqrt(HSPColor.pR * red * red + HSPColor.pG * green * green + HSPColor.pB * blue * blue);
+
+        if (Math.abs(red - green) < 0.00001 && Math.abs(red - blue) < 0.00001) {
+            return new HSPColor(0, 0, p, alpha);
+        }
+        if (red >= green && red >= blue) {   //  red is largest
+            if (blue >= green) {
+                h = 6. / 6. - 1. / 6. * (blue - green) / (red - green);
+                s = 1. - green / red;
+            } else {
+                h = 0. / 6. + 1. / 6. * (green - blue) / (red - blue);
+                s = 1. - blue / red;
+            }
+        } else if (green >= red && green >= blue) {   //  green is largest
+            if (red >= blue) {
+                h = 2. / 6. - 1. / 6. * (red - blue) / (green - blue);
+                s = 1. - blue / green;
+            } else {
+                h = 2. / 6. + 1. / 6. * (blue - red) / (green - red);
+                s = 1. - red / green;
+            }
+        } else {   //  blue is largest
+            if (green >= red) {
+                h = 4. / 6. - 1. / 6. * (green - red) / (blue - red);
+                s = 1. - red / blue;
+            } else {
+                h = 4. / 6. + 1. / 6. * (red - green) / (blue - green);
+                s = 1. - green / blue;
+            }
+        }
+
+        return new HSPColor(h, s, p, alpha);
+    }
+
     public static class HSPColor {
         private final static double pR = .299, pG = .587, pB = .114;
         private final double saturation, alpha, hue;
@@ -219,47 +260,5 @@ public class ColorUtils {
             }
             return Color.rgb((int) (r * 255), (int) (g * 255), (int) (b * 255)) | ((int) (alpha * 255) << 24);
         }
-    }
-
-    //Based on public domain function by Darel Rex Finley, 2006
-    //http://alienryderflex.com/hsp.html
-    public static HSPColor RGBtoHSP(int color) {
-        double red = Color.red(color) / 255.0;
-        double green = Color.green(color) / 255.0;
-        double blue = Color.blue(color) / 255.0;
-        double alpha = Color.alpha(color) / 255.0;
-
-        double h, s, p = Math.sqrt(HSPColor.pR * red * red + HSPColor.pG * green * green + HSPColor.pB * blue * blue);
-
-        if (Math.abs(red - green) < 0.00001 && Math.abs(red - blue) < 0.00001) {
-            return new HSPColor(0, 0, p, alpha);
-        }
-        if (red >= green && red >= blue) {   //  red is largest
-            if (blue >= green) {
-                h = 6. / 6. - 1. / 6. * (blue - green) / (red - green);
-                s = 1. - green / red;
-            } else {
-                h = 0. / 6. + 1. / 6. * (green - blue) / (red - blue);
-                s = 1. - blue / red;
-            }
-        } else if (green >= red && green >= blue) {   //  green is largest
-            if (red >= blue) {
-                h = 2. / 6. - 1. / 6. * (red - blue) / (green - blue);
-                s = 1. - blue / green;
-            } else {
-                h = 2. / 6. + 1. / 6. * (blue - red) / (green - red);
-                s = 1. - red / green;
-            }
-        } else {   //  blue is largest
-            if (green >= red) {
-                h = 4. / 6. - 1. / 6. * (green - red) / (blue - red);
-                s = 1. - red / blue;
-            } else {
-                h = 4. / 6. + 1. / 6. * (red - green) / (blue - green);
-                s = 1. - green / blue;
-            }
-        }
-
-        return new HSPColor(h, s, p, alpha);
     }
 }

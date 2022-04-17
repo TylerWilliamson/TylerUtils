@@ -41,8 +41,8 @@ public class LocaleUtils {
         if (df instanceof SimpleDateFormat) {
             String pattern = ((SimpleDateFormat) df).toPattern().replaceAll(":ss", "");
 
-            if (is24HourFormat(context,locale)) {
-                pattern = pattern.replaceAll(" a","").replaceAll("h","H");
+            if (is24HourFormat(context, locale)) {
+                pattern = pattern.replaceAll(" a", "").replaceAll("h", "H");
             }
 
             SimpleDateFormat sdf = new SimpleDateFormat(pattern, locale);
@@ -87,7 +87,7 @@ public class LocaleUtils {
     }
 
     private static boolean is24HourFormat(Context context, Locale locale) {
-        String overrideLocale24Hour = Settings.System.getString(context.getContentResolver(),Settings.System.TIME_12_24);
+        String overrideLocale24Hour = Settings.System.getString(context.getContentResolver(), Settings.System.TIME_12_24);
 
         if (overrideLocale24Hour != null) {
             return overrideLocale24Hour.equals("24");
@@ -106,12 +106,12 @@ public class LocaleUtils {
             case "es":
             case "sv":
             case "de":
-                return getDecimalString(locale,percentage * 100, 0) + " %";
+                return getDecimalString(locale, percentage * 100, 0) + " %";
             case "he":
             case "tr":
-                return "%" + getDecimalString(locale,percentage * 100, 0);
+                return "%" + getDecimalString(locale, percentage * 100, 0);
             default:
-                return getDecimalString(locale,percentage * 100, 0) + "%";
+                return getDecimalString(locale, percentage * 100, 0) + "%";
         }
     }
 
