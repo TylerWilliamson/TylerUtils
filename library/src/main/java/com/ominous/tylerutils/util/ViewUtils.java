@@ -43,6 +43,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 
 public class ViewUtils {
     public static final int FLAG_START = 1, FLAG_END = 2, FLAG_TOP = 4, FLAG_BOTTOM = 8;
@@ -153,12 +154,17 @@ public class ViewUtils {
 
                 Drawable[] drawables = new Drawable[3];
                 Resources res = editText.getContext().getResources();
-                drawables[0] = res.getDrawable(mCursorDrawableRes);
-                drawables[1] = res.getDrawable(mCursorDrawableLeftRes);
-                drawables[2] = res.getDrawable(mCursorDrawableRightRes);
-                drawables[0].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
-                drawables[1].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
-                drawables[2].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
+
+                drawables[0] = ResourcesCompat.getDrawable(res, mCursorDrawableRes, null);
+                drawables[1] = ResourcesCompat.getDrawable(res, mCursorDrawableLeftRes, null);
+                drawables[2] = ResourcesCompat.getDrawable(res, mCursorDrawableRightRes, null);
+
+                if (drawables[0] != null && drawables[1] != null && drawables[2] != null) {
+                    drawables[0].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
+                    drawables[1].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
+                    drawables[2].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
+                }
+
                 cursorDrawableField.set(editor, drawables);
             } catch (IllegalAccessException e) {
                 //

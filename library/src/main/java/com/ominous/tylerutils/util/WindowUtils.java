@@ -56,7 +56,7 @@ public class WindowUtils {
             WindowInsetsController controller = w.getInsetsController();
 
             if (controller != null) {
-                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE);
+                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
 
                 if (enable) {
                     controller.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
