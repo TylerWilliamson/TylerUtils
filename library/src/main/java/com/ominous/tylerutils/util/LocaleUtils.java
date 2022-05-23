@@ -20,9 +20,11 @@
 package com.ominous.tylerutils.util;
 
 import android.content.Context;
+import android.os.Build;
 import android.provider.Settings;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -117,5 +119,21 @@ public class LocaleUtils {
 
     public static String getDecimalString(Locale locale, double value, int decimalPlaces) {
         return decimalPlaces == 0 ? Integer.toString((int) value) : String.format(locale, "%." + decimalPlaces + "f", value);
+    }
+
+    public static double parseDouble(Locale locale, String doubleString) {
+        try {
+            if (Build.VERSION.SDK_INT >= 24) {
+                return android.icu.text.NumberFormat.getInstance(locale)
+                        .parse(doubleString == null ? "0" : doubleString)
+                        .doubleValue();
+            } else {
+                Number number = java.text.NumberFormat.getInstance(locale)
+                        .parse(doubleString == null ? "0" : doubleString);
+                return number == null ? 0 : number.doubleValue();
+            }
+        } catch (ParseException e) {
+            return 0;
+        }
     }
 }
