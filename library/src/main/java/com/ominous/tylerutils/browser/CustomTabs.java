@@ -121,7 +121,7 @@ public class CustomTabs {
     }
 
     @Override
-    public void finalize() throws Throwable {
+    protected void finalize() throws Throwable {
         if (customTabsServiceConnection != null) {
             context.get().unbindService(customTabsServiceConnection);
             customTabsServiceConnection = null;

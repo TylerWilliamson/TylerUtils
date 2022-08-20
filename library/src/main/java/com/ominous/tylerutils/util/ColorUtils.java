@@ -142,7 +142,7 @@ public class ColorUtils {
         }
         if (red >= green && red >= blue) {   //  red is largest
             if (blue >= green) {
-                h = 6. / 6. - 1. / 6. * (blue - green) / (red - green);
+                h = 1. - 1. / 6. * (blue - green) / (red - green);
                 s = 1. - green / red;
             } else {
                 h = 0. / 6. + 1. / 6. * (green - blue) / (red - blue);
