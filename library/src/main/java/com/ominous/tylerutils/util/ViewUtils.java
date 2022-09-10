@@ -41,9 +41,13 @@ import java.util.Locale;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.view.AccessibilityDelegateCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
 public class ViewUtils {
     public static final int FLAG_START = 1, FLAG_END = 2, FLAG_TOP = 4, FLAG_BOTTOM = 8;
@@ -174,4 +178,16 @@ public class ViewUtils {
         }
     }
 
+    public static void setAccessibilityInfo(View view, boolean focusable, boolean clickable, boolean longClickable) {
+        ViewCompat.setAccessibilityDelegate(view, new AccessibilityDelegateCompat() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(@NonNull View host, @NonNull AccessibilityNodeInfoCompat info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+
+                info.setClickable(clickable);
+                info.setLongClickable(longClickable);
+                info.setFocusable(focusable);
+            }
+        });
+    }
 }
