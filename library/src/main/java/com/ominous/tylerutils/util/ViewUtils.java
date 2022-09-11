@@ -42,6 +42,7 @@ import java.util.Locale;
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -178,15 +179,36 @@ public class ViewUtils {
         }
     }
 
-    public static void setAccessibilityInfo(View view, boolean focusable, boolean clickable, boolean longClickable) {
+    public static void setAccessibilityInfo(@NonNull View view, @Nullable String clickableLabel, @Nullable String longClickableLabel) {
         ViewCompat.setAccessibilityDelegate(view, new AccessibilityDelegateCompat() {
             @Override
             public void onInitializeAccessibilityNodeInfo(@NonNull View host, @NonNull AccessibilityNodeInfoCompat info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
 
-                info.setClickable(clickable);
-                info.setLongClickable(longClickable);
-                info.setFocusable(focusable);
+                for (AccessibilityNodeInfoCompat.AccessibilityActionCompat action : info.getActionList()) {
+                    if (action.getId() == AccessibilityNodeInfoCompat.ACTION_CLICK ||
+                            action.getId() == AccessibilityNodeInfoCompat.ACTION_LONG_CLICK) {
+                        info.removeAction(action);
+                    }
+                }
+
+                if (clickableLabel == null) {
+                    info.setClickable(false);
+                } else {
+                    info.addAction(new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                            AccessibilityNodeInfoCompat.ACTION_CLICK,
+                            clickableLabel));
+                    info.setClickable(true);
+                }
+
+                if (longClickableLabel == null) {
+                    info.setClickable(false);
+                } else {
+                    info.addAction(new AccessibilityNodeInfoCompat.AccessibilityActionCompat(
+                            AccessibilityNodeInfoCompat.ACTION_LONG_CLICK,
+                            longClickableLabel));
+                    info.setLongClickable(true);
+                }
             }
         });
     }
