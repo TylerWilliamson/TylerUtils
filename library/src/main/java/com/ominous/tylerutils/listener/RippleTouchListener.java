@@ -36,6 +36,7 @@ public class RippleTouchListener implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        @SuppressWarnings("RedundantCast") //This is required to use getForeground on API < 23
         Drawable background = v.getBackground(),
                 foreground = v instanceof BaseCardView ? ((BaseCardView) v).getForeground() : null;
 

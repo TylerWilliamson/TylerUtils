@@ -38,11 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -56,18 +54,17 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
     private final List<FragmentContainer> fragmentContainers = new ArrayList<>();
     private ViewPager2 viewPager;
-    private ImageButton nextButton;
-    private TextView finishButton;
-    private LinearLayout indicators;
-    private OnboardingPagerAdapter onboardingAdapter;
-    private ViewPager2.OnPageChangeCallback viewPagerCallback;
-
     private final OnBackPressedCallback viewPagerBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
         public void handleOnBackPressed() {
             viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
         }
     };
+    private ImageButton nextButton;
+    private TextView finishButton;
+    private LinearLayout indicators;
+    private OnboardingPagerAdapter onboardingAdapter;
+    private ViewPager2.OnPageChangeCallback viewPagerCallback;
 
     protected abstract void addFragments();
 

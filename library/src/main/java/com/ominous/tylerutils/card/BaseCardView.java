@@ -55,8 +55,8 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
         this.setCardElevation(context.getResources().getDimensionPixelSize(R.dimen.card_elevation));
 
         this.pressedAnimation = ValueAnimator.ofInt(
-                context.getResources().getDimensionPixelSize(R.dimen.card_elevation),
-                context.getResources().getDimensionPixelSize(R.dimen.card_elevation_pressed))
+                        context.getResources().getDimensionPixelSize(R.dimen.card_elevation),
+                        context.getResources().getDimensionPixelSize(R.dimen.card_elevation_pressed))
                 .setDuration(200);
 
         this.pressedAnimation.addUpdateListener(animation -> {
