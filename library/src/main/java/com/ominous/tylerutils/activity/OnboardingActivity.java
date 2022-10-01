@@ -37,9 +37,12 @@ import com.ominous.tylerutils.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -58,6 +61,13 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
     private LinearLayout indicators;
     private OnboardingPagerAdapter onboardingAdapter;
     private ViewPager2.OnPageChangeCallback viewPagerCallback;
+
+    private final OnBackPressedCallback viewPagerBackPressedCallback = new OnBackPressedCallback(false) {
+        @Override
+        public void handleOnBackPressed() {
+            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
+        }
+    };
 
     protected abstract void addFragments();
 
@@ -102,6 +112,8 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
             @Override
             public void onPageSelected(int position) {
+                viewPagerBackPressedCallback.setEnabled(position > 0);
+
                 updateIndicators(position);
 
                 for (int i = 0, l = fragmentContainers.size(); i < l; i++) {
@@ -124,6 +136,8 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         };
 
         viewPager.registerOnPageChangeCallback(viewPagerCallback);
+
+        getOnBackPressedDispatcher().addCallback(viewPagerBackPressedCallback);
 
         nextButton.setOnClickListener(this);
         finishButton.setOnClickListener(this);
@@ -218,15 +232,6 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
 
     public void setCurrentPage(int page) {
         viewPager.setCurrentItem(page);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (viewPager.getCurrentItem() > 0) {
-            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
-        } else {
-            super.onBackPressed();
-        }
     }
 
     private static class FragmentContainer {
