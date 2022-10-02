@@ -48,6 +48,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
+/**
+ * @Deprecated Please use OnboardingActivity2 instead
+ */
 public abstract class OnboardingActivity extends AppCompatActivity implements View.OnClickListener {
 
     //TODO fix when canAdvance(true) changes to canAdvance(false)
