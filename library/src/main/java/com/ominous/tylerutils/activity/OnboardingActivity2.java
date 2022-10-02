@@ -142,7 +142,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         super.onAttachedToWindow();
 
         WindowUtils.setLightNavBar(getWindow(),
-                (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES);
+                (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES);
     }
 
     @Override
