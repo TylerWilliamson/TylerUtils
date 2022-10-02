@@ -20,6 +20,7 @@
 apply plugin: "com.android.library"
 
 android {
+    namespace "com.ominous.tylerutils"
     compileSdkVersion 33
     defaultConfig {
         minSdkVersion 16
