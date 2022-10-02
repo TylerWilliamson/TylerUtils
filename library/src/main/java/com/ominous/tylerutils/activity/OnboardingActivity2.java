@@ -282,11 +282,13 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         super.onSaveInstanceState(outState);
 
         for (int i = 0, l = onboardingContainers.size(); i < l; i++) {
-            Bundle bundle = new Bundle();
+            if (onboardingContainers.get(i).isInstantiated()) {
+                Bundle bundle = new Bundle();
 
-            onboardingContainers.get(i).onSaveInstanceState(bundle);
+                onboardingContainers.get(i).onSaveInstanceState(bundle);
 
-            outState.putBundle(Integer.toString(i), bundle);
+                outState.putBundle(Integer.toString(i), bundle);
+            }
         }
     }
 
