@@ -271,7 +271,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         for (int i = 0, l = onboardingContainers.size(); i < l; i++) {
             Bundle bundle = savedInstanceState.getBundle(Integer.toString(i));
 
-            if (bundle != null) {
+            if (bundle != null && onboardingContainers.get(i).isInstantiated()) {
                 onboardingContainers.get(i).onRestoreInstanceState(bundle);
             }
         }
