@@ -90,7 +90,7 @@ public class HttpRequest {
         return this;
     }
 
-    private InputStream connect() throws HttpException {
+    public InputStream connect() throws HttpException {
         //This handles HTTPS too
         try {
             conn = (HttpURLConnection) new URL(this.url).openConnection();
