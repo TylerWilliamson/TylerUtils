@@ -41,6 +41,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -199,16 +200,23 @@ public class CustomTabs {
 
             //Otherwise, try a Custom Tab
             if (!launched) {
-                customTabsIntent.launchUrl(context, uri);
+                try {
+                    customTabsIntent.launchUrl(context, uri);
+                } catch (ActivityNotFoundException e) {
+                    context.startActivity(
+                            new Intent(Intent.ACTION_VIEW, uri)
+                                    .addCategory(Intent.CATEGORY_BROWSABLE));
+                }
             }
         }
     }
 
+    @RequiresApi(api = 30)
     private boolean launchNative(Context context, Uri uri) {
         try {
             context.startActivity(new Intent(Intent.ACTION_VIEW, uri)
                     .addCategory(Intent.CATEGORY_BROWSABLE)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | (Build.VERSION.SDK_INT >= 30 ? Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER : 0)));
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER));
             return true;
         } catch (ActivityNotFoundException ex) {
             return false;
