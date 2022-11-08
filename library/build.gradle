@@ -41,14 +41,30 @@ android {
 }
 
 dependencies {
-    implementation "androidx.activity:activity:1.6.0"
-    implementation "androidx.browser:browser:1.4.0"
-    implementation "androidx.viewpager2:viewpager2:1.0.0"
-    implementation "androidx.cardview:cardview:1.0.0"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
-    implementation "androidx.work:work-runtime:2.7.1"
+    implementation "androidx.activity:activity:1.6.1"
+    implementation("androidx.fragment:fragment:1.5.4") {
+        exclude group: "androidx.core", module: "core"
+        exclude group: "androidx.lifecycle", module: "lifecycle-viewmodel"
+        exclude group: "androidx.lifecycle", module: "lifecycle-livedata"
+        exclude group: "androidx.viewpager", module: "viewpager"
+    }
+    implementation("androidx.browser:browser:1.4.0") {
+        exclude group: "androidx.core", module: "core"
+    }
+    implementation("androidx.viewpager2:viewpager2:1.0.0") {
+        exclude group: "androidx.core", module: "core"
+        exclude group: "androidx.fragment", module: "fragment"
+        exclude group: "androidx.recyclerview", module: "recyclerview"
+    }
+    implementation("androidx.work:work-runtime:2.7.1") {
+        exclude group: "androidx.lifecycle", module: "lifecycle-livedata"
+    }
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
-    implementation "com.google.android.material:material:1.6.1"
+    implementation("com.google.android.material:material:1.7.0") {
+        exclude group: "androidx.core", module: "core"
+        exclude group: "androidx.fragment", module: "fragment"
+        exclude group: "androidx.loader", module: "loader"
+    }
 }
 
 afterEvaluate {
