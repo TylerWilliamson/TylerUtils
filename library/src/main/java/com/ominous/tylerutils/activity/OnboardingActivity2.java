@@ -209,7 +209,11 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     }
 
     public void setCurrentPage(int page) {
-        viewPager.setCurrentItem(page);
+        setCurrentPage(page, true);
+    }
+
+    public void setCurrentPage(int page, boolean smoothScroll) {
+        viewPager.setCurrentItem(page, smoothScroll);
     }
 
     public abstract List<OnboardingContainer> createOnboardingContainers();
