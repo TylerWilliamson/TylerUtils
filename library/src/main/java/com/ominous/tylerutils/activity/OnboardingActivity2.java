@@ -29,11 +29,16 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsetsController;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.ominous.tylerutils.R;
+import com.ominous.tylerutils.util.WindowUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -43,14 +48,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.ominous.tylerutils.R;
-import com.ominous.tylerutils.util.WindowUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
 //TODO fix when canAdvance(true) changes to canAdvance(false)
 public abstract class OnboardingActivity2 extends AppCompatActivity implements View.OnClickListener {
+    private static final String KEY_VIEWPAGER_PAGE = "KEY_VIEWPAGER_PAGE";
     private ViewPager2 viewPager;
     private ImageButton nextButton;
     private TextView finishButton;
@@ -83,7 +83,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         this.createIndicators();
         this.updateIndicators(0);
 
-        onboardingAdapter = new OnboardingPagerAdapter(onboardingContainers);
+        onboardingAdapter = new OnboardingPagerAdapter(onboardingContainers, savedInstanceState == null ? 1 : savedInstanceState.getInt(KEY_VIEWPAGER_PAGE, 0) + 1);
 
         viewPager.setAdapter(onboardingAdapter);
         viewPager.setPageTransformer(new MarginPageTransformer((int) getResources().getDimension(R.dimen.margin_standard)));
@@ -128,6 +128,13 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
 
         nextButton.setOnClickListener(this);
         finishButton.setOnClickListener(this);
+
+        if (savedInstanceState != null) {
+            viewPager.setCurrentItem(savedInstanceState.getInt(KEY_VIEWPAGER_PAGE, 0), false);
+        }
+
+        WindowUtils.setLightNavBar(getWindow(),
+                (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES);
     }
 
     @Override
@@ -135,14 +142,6 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         super.onResume();
 
         notifyViewPager();
-    }
-
-    @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-
-        WindowUtils.setLightNavBar(getWindow(),
-                (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES);
     }
 
     @Override
@@ -272,6 +271,9 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
+        viewPager.setCurrentItem(
+                savedInstanceState.getInt(KEY_VIEWPAGER_PAGE, 0), false);
+
         for (int i = 0, l = onboardingContainers.size(); i < l; i++) {
             Bundle bundle = savedInstanceState.getBundle(Integer.toString(i));
 
@@ -284,6 +286,8 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        outState.putInt(KEY_VIEWPAGER_PAGE, viewPager.getCurrentItem());
 
         for (int i = 0, l = onboardingContainers.size(); i < l; i++) {
             if (onboardingContainers.get(i).isInstantiated()) {
@@ -298,9 +302,11 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
 
     private static class OnboardingPagerAdapter extends RecyclerView.Adapter<OnboardingViewHolder> {
         private final List<OnboardingContainer> onboardingContainers;
+        private final int minSize;
 
-        public OnboardingPagerAdapter(List<OnboardingContainer> onboardingContainers) {
+        public OnboardingPagerAdapter(List<OnboardingContainer> onboardingContainers, int minSize) {
             this.onboardingContainers = onboardingContainers;
+            this.minSize = minSize;
         }
 
         @Override
@@ -326,9 +332,9 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
 
         @Override
         public int getItemCount() {
-            int count = 1;
+            int count = minSize;
 
-            for (int i = 0, l = onboardingContainers.size(); i < l; i++) {
+            for (int i = minSize - 1, l = onboardingContainers.size(); i < l; i++) {
                 if (onboardingContainers.get(i).isInstantiated() &&
                         onboardingContainers.get(i).canAdvanceToNextPage()) {
                     count++;
