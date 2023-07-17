@@ -127,6 +127,24 @@ public class ColorUtils {
         return systemAccentColor != 0 ? systemAccentColor : defaultColorRes;
     }
 
+    public static double getContrastRatio(@ColorInt int color, @ColorInt int backgroundColor) {
+        double colorLum = getRelativeLuminance(color);
+        double backgroundColorLum = getRelativeLuminance(backgroundColor);
+        return (Math.max(colorLum, backgroundColorLum) + 0.05) /
+                (Math.min(colorLum, backgroundColorLum) + 0.05);
+    }
+
+    public static double getRelativeLuminance(@ColorInt int color) {
+        double Rs = Color.red(color) / 255.;
+        double Gs = Color.green(color) / 255.;
+        double Bs = Color.blue(color) / 255.;
+        double R = Rs <= 0.03928 ? Rs / 12.92 : Math.pow((Rs + 0.055) / 1.055, 2.4);
+        double G = Gs <= 0.03928 ? Gs / 12.92 : Math.pow((Gs + 0.055) / 1.055, 2.4);
+        double B = Bs <= 0.03928 ? Bs / 12.92 : Math.pow((Bs + 0.055) / 1.055, 2.4);
+
+        return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+    }
+
     //Based on public domain function by Darel Rex Finley, 2006
     //http://alienryderflex.com/hsp.html
     public static HSPColor RGBtoHSP(int color) {
