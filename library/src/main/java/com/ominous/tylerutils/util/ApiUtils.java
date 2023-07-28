@@ -19,6 +19,9 @@
 
 package com.ominous.tylerutils.util;
 
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -72,5 +75,26 @@ public class ApiUtils {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @SuppressLint("DiscouragedApi")
+    public static CharSequence getStringResourceFromApplication(
+            PackageManager packageManager,
+            String packageName,
+            String identifier,
+            CharSequence defaultValue) {
+        CharSequence value;
+
+        try {
+            int resId = packageManager
+                    .getResourcesForApplication(packageName)
+                    .getIdentifier(packageName + ":string/" + identifier, null, null);
+
+            value = resId == 0 ? null : packageManager.getText(packageName, resId, null);
+        } catch (PackageManager.NameNotFoundException e) {
+            value = null;
+        }
+
+        return value == null ? defaultValue : value;
     }
 }
