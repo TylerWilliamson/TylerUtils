@@ -154,12 +154,14 @@ public abstract class OnboardingActivity extends AppCompatActivity implements Vi
         if (Build.VERSION.SDK_INT >= 30) {
             WindowInsetsController wic = getWindow().getInsetsController();
 
-            wic.setSystemBarsAppearance(
-                    nightModeFlags == Configuration.UI_MODE_NIGHT_YES ? 0 :
-                            WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS |
-                                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS |
-                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+            if (wic != null) {
+                wic.setSystemBarsAppearance(
+                        nightModeFlags == Configuration.UI_MODE_NIGHT_YES ? 0 :
+                                WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS |
+                                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                        WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS |
+                                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+            }
         } else {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
