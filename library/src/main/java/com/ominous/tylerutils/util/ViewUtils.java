@@ -33,12 +33,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.ominous.tylerutils.R;
-
-import java.lang.reflect.Field;
-import java.util.Locale;
-
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -49,6 +43,11 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.ominous.tylerutils.R;
+
+import java.util.Locale;
 
 public class ViewUtils {
     public static final int FLAG_START = 1, FLAG_END = 2, FLAG_TOP = 4, FLAG_BOTTOM = 8;
@@ -114,7 +113,6 @@ public class ViewUtils {
         return text == null ? "" : text.toString();
     }
 
-    @SuppressWarnings("JavaReflectionMemberAccess")
     @SuppressLint("DiscouragedPrivateApi")
     public static void setEditTextCursorColor(EditText editText, int cursorColor) {
         if (Build.VERSION.SDK_INT >= 29) {
@@ -125,56 +123,54 @@ public class ViewUtils {
 
             PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
 
-            cursor.setColorFilter(colorFilter);
-            cursorHandle.setColorFilter(colorFilter);
-            cursorHandleLeft.setColorFilter(colorFilter);
-            cursorHandleRight.setColorFilter(colorFilter);
+            if (cursor != null) {
+                cursor.setColorFilter(colorFilter);
+            }
+
+            if (cursorHandle != null) {
+                cursorHandle.setColorFilter(colorFilter);
+                editText.setTextSelectHandle(cursorHandle);
+            }
+
+            if (cursorHandleLeft != null) {
+                cursorHandleLeft.setColorFilter(colorFilter);
+                editText.setTextSelectHandleLeft(cursorHandleLeft);
+            }
+
+            if (cursorHandleRight != null) {
+                cursorHandleRight.setColorFilter(colorFilter);
+                editText.setTextSelectHandleRight(cursorHandleRight);
+            }
 
             editText.setTextCursorDrawable(cursor);
-            editText.setTextSelectHandle(cursorHandle);
-            editText.setTextSelectHandleLeft(cursorHandleLeft);
-            editText.setTextSelectHandleRight(cursorHandleRight);
         } else {
-            try {
-                //TODO: Create Generic methods for reflection
-                Field fCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
-                fCursorDrawableRes.setAccessible(true);
-                int mCursorDrawableRes = fCursorDrawableRes.getInt(editText);
+            Drawable[] drawables = new Drawable[3];
+            Resources res = editText.getContext().getResources();
 
-                // Left
-                Field cursorDrawableLeftResField = TextView.class.getDeclaredField("mTextSelectHandleLeftRes");
-                cursorDrawableLeftResField.setAccessible(true);
-                int mCursorDrawableLeftRes = cursorDrawableLeftResField.getInt(editText);
+            Object mCursorDrawableResObj = ApiUtils.getPrivateField(TextView.class, editText, "mCursorDrawableRes");
+            if (mCursorDrawableResObj != null) {
+                drawables[0] = ResourcesCompat.getDrawable(res, (Integer) mCursorDrawableResObj, null);
+            }
 
-                // Right
-                Field cursorDrawableRightResField = TextView.class.getDeclaredField("mTextSelectHandleRightRes");
-                cursorDrawableRightResField.setAccessible(true);
-                int mCursorDrawableRightRes = cursorDrawableRightResField.getInt(editText);
+            Object mCursorDrawableLeftResObj = ApiUtils.getPrivateField(TextView.class, editText, "mTextSelectHandleLeftRes");
+            if (mCursorDrawableLeftResObj != null) {
+                drawables[1] = ResourcesCompat.getDrawable(res, (Integer) mCursorDrawableLeftResObj, null);
+            }
 
-                Field editorField = TextView.class.getDeclaredField("mEditor");
-                editorField.setAccessible(true);
-                Object editor = editorField.get(editText);
-                Field cursorDrawableField = editor.getClass().getDeclaredField("mCursorDrawable");
-                cursorDrawableField.setAccessible(true);
+            Object mCursorDrawableRightResObj = ApiUtils.getPrivateField(TextView.class, editText, "mTextSelectHandleRightRes");
+            if (mCursorDrawableRightResObj != null) {
+                drawables[2] = ResourcesCompat.getDrawable(res, (Integer) mCursorDrawableRightResObj, null);
+            }
 
-                Drawable[] drawables = new Drawable[3];
-                Resources res = editText.getContext().getResources();
-
-                drawables[0] = ResourcesCompat.getDrawable(res, mCursorDrawableRes, null);
-                drawables[1] = ResourcesCompat.getDrawable(res, mCursorDrawableLeftRes, null);
-                drawables[2] = ResourcesCompat.getDrawable(res, mCursorDrawableRightRes, null);
-
-                if (drawables[0] != null && drawables[1] != null && drawables[2] != null) {
-                    drawables[0].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
-                    drawables[1].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
-                    drawables[2].setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
+            for (Drawable d : drawables) {
+                if (d != null) {
+                    d.setColorFilter(cursorColor, PorterDuff.Mode.SRC_IN);
                 }
+            }
 
-                cursorDrawableField.set(editor, drawables);
-            } catch (IllegalAccessException e) {
-                //
-            } catch (NoSuchFieldException e) {
-                //
+            Object editor = ApiUtils.getPrivateField(TextView.class, editText, "mEditor");
+            if (editor != null) {
+                ApiUtils.setPrivateField(editor.getClass(), editor, "mCursorDrawable", drawables);
             }
         }
     }
