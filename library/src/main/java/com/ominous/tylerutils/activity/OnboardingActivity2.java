@@ -19,6 +19,9 @@
 
 package com.ominous.tylerutils.activity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -29,41 +32,65 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.ominous.tylerutils.R;
-import com.ominous.tylerutils.util.WindowUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.ominous.tylerutils.R;
+import com.ominous.tylerutils.anim.OpenCloseHandler;
+import com.ominous.tylerutils.util.WindowUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
 //TODO fix when canAdvance(true) changes to canAdvance(false)
 public abstract class OnboardingActivity2 extends AppCompatActivity implements View.OnClickListener {
     private static final String KEY_VIEWPAGER_PAGE = "KEY_VIEWPAGER_PAGE";
+    private CoordinatorLayout coordinatorLayout;
+    private ConstraintLayout advancedMenuLayout;
+    private ConstraintLayout onboardingMenuLayout;
+
     private ViewPager2 viewPager;
     private ImageButton nextButton;
     private TextView finishButton;
+    private TextView advancedButton;
+
     private LinearLayout indicators;
     private OnboardingPagerAdapter onboardingAdapter;
     private ViewPager2.OnPageChangeCallback viewPagerCallback;
     private List<OnboardingContainer> onboardingContainers;
+    private OnboardingContainer advancedOnboardingContainer;
     private List<ImageView> onboardingIndicators;
+
+    private OpenCloseHandler advancedMenuHandler;
 
     private final OnBackPressedCallback viewPagerBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
         public void handleOnBackPressed() {
-            viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
+            switch (advancedMenuHandler.getState()) {
+                case OPEN:
+                case OPENING:
+                    advancedMenuHandler.close();
+                    break;
+                case CLOSED:
+                    viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
+                    break;
+                case CLOSING:
+                    break;
+            }
         }
     };
 
@@ -73,12 +100,20 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
 
         this.setContentView(R.layout.activity_onboarding);
 
+        coordinatorLayout = findViewById(R.id.coordinator_layout);
+        onboardingMenuLayout = findViewById(R.id.onboarding_menu_layout);
+        advancedMenuLayout = findViewById(R.id.advanced_menu_layout);
+        FrameLayout advancedMenuFrame = findViewById(R.id.advanced_menu_frame);
+
         nextButton = findViewById(R.id.button_next);
         finishButton = findViewById(R.id.button_finish);
+        advancedButton = findViewById(R.id.button_advanced);
+
         viewPager = findViewById(R.id.container);
         indicators = findViewById(R.id.indicators);
 
         onboardingContainers = createOnboardingContainers();
+        advancedOnboardingContainer = createAdvancedMenuOnboardingContainer();
 
         this.createIndicators();
         this.updateIndicators(0);
@@ -115,6 +150,10 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
                 finishButton.setVisibility(position == (onboardingContainers.size() - 1) &&
                         onboardingContainers.get(position).isInstantiated() &&
                         onboardingContainers.get(position).canAdvanceToNextPage() ? View.VISIBLE : View.GONE);
+                advancedButton.setVisibility(advancedOnboardingContainer != null &&
+                        (position == onboardingContainers.size() - 1) &&
+                        onboardingContainers.get(position).isInstantiated() &&
+                        onboardingContainers.get(position).canAdvanceToNextPage() ? View.VISIBLE : View.GONE);
             }
 
             @Override
@@ -135,6 +174,73 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
 
         WindowUtils.setLightNavBar(getWindow(),
                 (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES);
+
+        if (advancedOnboardingContainer == null) {
+            advancedMenuLayout.setVisibility(View.GONE);
+        } else {
+            coordinatorLayout
+                    .getViewTreeObserver()
+                    .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            int coordinatorLayoutHeight = coordinatorLayout.getHeight();
+
+                            advancedMenuLayout.setTranslationY(coordinatorLayoutHeight);
+
+                            ValueAnimator advancedMenuCloseAnimator = ValueAnimator.ofFloat(0, coordinatorLayoutHeight)
+                                    .setDuration(500);
+                            ValueAnimator advancedMenuOpenAnimator = ValueAnimator.ofFloat(coordinatorLayoutHeight, 0)
+                                    .setDuration(500);
+
+                            ValueAnimator.AnimatorUpdateListener animatorUpdateListener = animation -> {
+                                float translate = (Float) animation.getAnimatedValue();
+
+                                onboardingMenuLayout.setTranslationY(translate - coordinatorLayoutHeight);
+                                advancedMenuLayout.setTranslationY(translate);
+                            };
+
+                            advancedMenuCloseAnimator.addUpdateListener(animatorUpdateListener);
+                            advancedMenuOpenAnimator.addUpdateListener(animatorUpdateListener);
+
+                            advancedMenuCloseAnimator.addListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    onboardingMenuLayout.setTranslationY(0);
+                                    advancedMenuLayout.setTranslationY(coordinatorLayoutHeight);
+
+                                    advancedOnboardingContainer.onPageDeselected();
+                                }
+                            });
+
+                            advancedMenuOpenAnimator.addListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    onboardingMenuLayout.setTranslationY(coordinatorLayoutHeight);
+                                    advancedMenuLayout.setTranslationY(0);
+
+                                    advancedOnboardingContainer.onPageSelected();
+                                }
+                            });
+
+                            advancedMenuHandler = new OpenCloseHandler(
+                                    advancedMenuOpenAnimator,
+                                    advancedMenuCloseAnimator);
+
+                            coordinatorLayout
+                                    .getViewTreeObserver()
+                                    .removeOnGlobalLayoutListener(this);
+                        }
+                    });
+
+            View advancedMenuView = advancedOnboardingContainer.inflate(advancedMenuFrame);
+            advancedMenuFrame.addView(advancedMenuView);
+            advancedOnboardingContainer.onCreateView(advancedMenuView);
+            advancedOnboardingContainer.onBindView(advancedMenuView);
+            advancedOnboardingContainer.setInstantiated();
+
+            advancedButton.setOnClickListener(v -> advancedMenuHandler.open());
+            findViewById(R.id.button_advanced_close).setOnClickListener(v -> advancedMenuHandler.close());
+        }
     }
 
     @Override
@@ -154,6 +260,8 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
                 for (OnboardingContainer onboardingContainer : onboardingContainers) {
                     onboardingContainer.onFinish();
                 }
+
+                advancedOnboardingContainer.onFinish();
 
                 this.onFinish();
                 this.finish();
@@ -221,6 +329,12 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         return onboardingContainers;
     }
 
+    public abstract OnboardingContainer createAdvancedMenuOnboardingContainer();
+
+    public OnboardingContainer getAdvancedMenuOnboardingContainer() {
+        return advancedOnboardingContainer;
+    }
+
     public abstract static class OnboardingContainer {
         private final Context context;
         private boolean isInstantiated = false;
@@ -265,6 +379,12 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         protected void setInstantiated() {
             isInstantiated = true;
         }
+
+        private View inflate(ViewGroup parent) {
+            return LayoutInflater
+                    .from(parent.getContext())
+                    .inflate(getViewRes(), parent, false);
+        }
     }
 
     @Override
@@ -280,6 +400,12 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
             if (bundle != null && onboardingContainers.get(i).isInstantiated()) {
                 onboardingContainers.get(i).onRestoreInstanceState(bundle);
             }
+        }
+
+        Bundle advancedBundle = savedInstanceState.getBundle("ADV");
+
+        if (advancedBundle != null) {
+            advancedOnboardingContainer.onRestoreInstanceState(advancedBundle);
         }
     }
 
@@ -298,6 +424,9 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
                 outState.putBundle(Integer.toString(i), bundle);
             }
         }
+        Bundle advancedMenuBundle = new Bundle();
+        advancedOnboardingContainer.onSaveInstanceState(advancedMenuBundle);
+        outState.putBundle("ADV", advancedMenuBundle);
     }
 
     private static class OnboardingPagerAdapter extends RecyclerView.Adapter<OnboardingViewHolder> {
@@ -317,7 +446,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         @NonNull
         @Override
         public OnboardingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(onboardingContainers.get(viewType).getViewRes(), parent, false);
+            View v = onboardingContainers.get(viewType).inflate(parent);
 
             onboardingContainers.get(viewType).onCreateView(v);
             onboardingContainers.get(viewType).setInstantiated();

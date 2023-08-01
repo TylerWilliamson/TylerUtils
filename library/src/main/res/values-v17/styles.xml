@@ -1,4 +1,4 @@
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright 2020 - 2023 Tyler Williamson
   ~
   ~ This file is part of TylerUtils.
@@ -19,38 +19,20 @@
 
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-
-    </style>
-
-    <style name="AppTheme.Card">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:clickable">true</item>
+    <style name="AppTheme.Onboarding.Button" parent="Widget.AppCompat.Button.Borderless">
+        <item name="tint">@color/text_primary</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:padding">@dimen/margin_standard</item>
         <item name="android:layout_marginLeft">@dimen/margin_standard</item>
         <item name="android:layout_marginRight">@dimen/margin_standard</item>
-        <item name="android:layout_marginTop">@dimen/margin_standard</item>
-        <item name="android:paddingLeft">@dimen/margin_standard</item>
-        <item name="android:paddingRight">@dimen/margin_standard</item>
-        <item name="android:paddingTop">@dimen/margin_standard</item>
-        <item name="android:paddingBottom">@dimen/margin_standard</item>
     </style>
-
-    <style name="AppTheme.Onboarding"></style>
 
     <style name="AppTheme.Onboarding.TextButton" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:layout_marginLeft">@dimen/margin_standard</item>
         <item name="android:layout_marginRight">@dimen/margin_standard</item>
         <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
     </style>
-
-    <style name="AppTheme.Onboarding.Button" parent="Widget.AppCompat.Button.Borderless">
-        <item name="tint">@color/text_primary</item>
-        <item name="android:padding">@dimen/margin_standard</item>
-        <item name="android:layout_marginLeft">@dimen/margin_standard</item>
-        <item name="android:layout_marginRight">@dimen/margin_standard</item>
-    </style>
-
 </resources>
