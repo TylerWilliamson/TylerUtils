@@ -47,9 +47,7 @@ public class LinkedTextView extends AppCompatTextView {
     public LinkedTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        if (customTabs == null) {
-            customTabs = CustomTabs.getInstance(getContext());
-        }
+        customTabs = CustomTabs.getInstance(context);
 
         setMovementMethod(LinkMovementMethod.getInstance());
     }
