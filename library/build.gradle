@@ -54,7 +54,7 @@ dependencies {
         because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
     }
     implementation "androidx.activity:activity:1.7.2"
-    implementation("androidx.fragment:fragment:1.6.0") {
+    implementation("androidx.fragment:fragment:1.6.1") {
         exclude group: "androidx.core", module: "core"
         exclude group: "androidx.lifecycle", module: "lifecycle-viewmodel"
         exclude group: "androidx.lifecycle", module: "lifecycle-livedata"
