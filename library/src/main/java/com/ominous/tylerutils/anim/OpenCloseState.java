@@ -23,5 +23,5 @@ public enum OpenCloseState {
     OPEN,
     OPENING,
     CLOSED,
-    CLOSING;
+    CLOSING
 }
