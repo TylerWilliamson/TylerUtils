@@ -17,9 +17,7 @@
   ~ along with TylerUtils.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ominous.tylerutils">
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <queries>
         <intent>
             <action android:name="android.support.customtabs.action.CustomTabsService" />
