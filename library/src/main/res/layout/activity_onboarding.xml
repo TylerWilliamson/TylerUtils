@@ -106,7 +106,8 @@
             android:id="@+id/advanced_top_menu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/advanced_divider">
 
             <TextView
                 android:id="@+id/button_advanced_close"
@@ -118,11 +119,21 @@
 
         </FrameLayout>
 
+        <!-- divider -->
+        <View
+            android:id="@+id/advanced_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@color/text_primary"
+            app:layout_constraintBottom_toTopOf="@id/advanced_menu_frame"
+            app:layout_constraintTop_toBottomOf="@id/advanced_top_menu" />
+
         <FrameLayout
             android:id="@+id/advanced_menu_frame"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/advanced_top_menu"
+            app:layout_constraintTop_toBottomOf="@+id/advanced_divider"
             app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
