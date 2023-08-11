@@ -76,6 +76,8 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     private List<ImageView> onboardingIndicators;
 
     private OpenCloseHandler advancedMenuHandler;
+    private ValueAnimator advancedMenuCloseAnimator;
+    private ValueAnimator advancedMenuOpenAnimator;
 
     private final OnBackPressedCallback viewPagerBackPressedCallback = new OnBackPressedCallback(false) {
         @Override
@@ -83,7 +85,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
             switch (advancedMenuHandler.getState()) {
                 case OPEN:
                 case OPENING:
-                    advancedMenuHandler.close();
+                    closeAdvancedMenu();
                     break;
                 case CLOSED:
                     viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
@@ -187,9 +189,9 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
 
                             advancedMenuLayout.setTranslationY(coordinatorLayoutHeight);
 
-                            ValueAnimator advancedMenuCloseAnimator = ValueAnimator.ofFloat(0, coordinatorLayoutHeight)
+                            advancedMenuCloseAnimator = ValueAnimator.ofFloat(0, coordinatorLayoutHeight)
                                     .setDuration(500);
-                            ValueAnimator advancedMenuOpenAnimator = ValueAnimator.ofFloat(coordinatorLayoutHeight, 0)
+                            advancedMenuOpenAnimator = ValueAnimator.ofFloat(coordinatorLayoutHeight, 0)
                                     .setDuration(500);
 
                             ValueAnimator.AnimatorUpdateListener animatorUpdateListener = animation -> {
@@ -238,8 +240,8 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
             advancedOnboardingContainer.onBindView(advancedMenuView);
             advancedOnboardingContainer.setInstantiated();
 
-            advancedButton.setOnClickListener(v -> advancedMenuHandler.open());
-            findViewById(R.id.button_advanced_close).setOnClickListener(v -> advancedMenuHandler.close());
+            advancedButton.setOnClickListener(v -> openAdvancedMenu());
+            findViewById(R.id.button_advanced_close).setOnClickListener(v -> closeAdvancedMenu());
         }
     }
 
@@ -321,6 +323,24 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
 
     public void setCurrentPage(int page, boolean smoothScroll) {
         viewPager.setCurrentItem(page, smoothScroll);
+    }
+
+    public void openAdvancedMenu() {
+        openAdvancedMenu(false);
+    }
+
+    public void openAdvancedMenu(boolean now) {
+        advancedMenuOpenAnimator.setDuration(now ? 0 : 500);
+        advancedMenuHandler.open();
+    }
+
+    public void closeAdvancedMenu() {
+        closeAdvancedMenu(false);
+    }
+
+    public void closeAdvancedMenu(boolean now) {
+        advancedMenuCloseAnimator.setDuration(now ? 0 : 500);
+        advancedMenuHandler.close();
     }
 
     public abstract List<OnboardingContainer> createOnboardingContainers();
