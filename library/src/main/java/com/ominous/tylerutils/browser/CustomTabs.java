@@ -29,6 +29,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Browser;
 
 import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.util.BitmapUtils;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -156,6 +158,22 @@ public class CustomTabs {
                 .build();
     }
 
+    public void setLocale() {
+        Bundle headers = customTabsIntent.intent.getBundleExtra(Browser.EXTRA_HEADERS);
+
+        if (headers != null) {
+            Locale currentLocale = Locale.getDefault();
+
+            headers.putString("Accept-Language",
+                    "".equals(currentLocale.getCountry()) ?
+                            currentLocale.getLanguage() :
+                            currentLocale.getLanguage() + '-' + currentLocale.getCountry()
+            );
+
+            customTabsIntent.intent.putExtra(Browser.EXTRA_HEADERS, headers);
+        }
+    }
+
     public void addLikelyUris(Uri... uris) {
         likelyUris.addAll(Arrays.asList(uris));
 
@@ -186,6 +204,8 @@ public class CustomTabs {
 
         if (currentTime - lastLaunch > 300) { //rate limit
             lastLaunch = currentTime;
+
+            setLocale();
 
             boolean launched;
 
