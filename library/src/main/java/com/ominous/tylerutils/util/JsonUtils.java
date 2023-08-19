@@ -57,7 +57,10 @@ public class JsonUtils {
                         field.getType().equals(Boolean.class)) {
                     field.set(obj, json.get(fieldName));
                 } else if (field.getType().isArray()) {
-                    field.set(obj, deserialize(field.getType().getComponentType(), json.getJSONArray(fieldName)));
+                    field.set(obj, field.getType().getComponentType() != null &&
+                            field.getType().getComponentType().isPrimitive() ?
+                            deserializePrimitiveArray(field.getType().getComponentType(), json.getJSONArray(fieldName)) :
+                            deserialize(field.getType().getComponentType(), json.getJSONArray(fieldName)));
                 } else {
                     field.set(obj, deserialize(field.getType(), json.getJSONObject(fieldName)));
                 }
@@ -65,5 +68,16 @@ public class JsonUtils {
         }
 
         return obj;
+    }
+
+    public static Object deserializePrimitiveArray(Class<?> objClass, JSONArray json)
+            throws JSONException {
+        Object array = Array.newInstance(objClass, json.length());
+
+        for (int i = 0, l = json.length(); i < l; i++) {
+            Array.set(array, i, json.get(i));
+        }
+
+        return array;
     }
 }
