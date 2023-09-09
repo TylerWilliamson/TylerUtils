@@ -20,6 +20,7 @@
 package com.ominous.tylerutils.anim;
 
 public enum OpenCloseState {
+    NULL,
     OPEN,
     OPENING,
     CLOSED,

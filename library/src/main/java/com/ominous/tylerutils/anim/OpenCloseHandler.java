@@ -35,24 +35,24 @@ public class OpenCloseHandler {
         this.openAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                state = OpenCloseState.OPENING;
+                setState(OpenCloseState.OPENING);
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                state = OpenCloseState.OPEN;
+                setState(OpenCloseState.OPEN);
             }
         });
 
         this.closeAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                state = OpenCloseState.CLOSING;
+                setState(OpenCloseState.CLOSING);
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                state = OpenCloseState.CLOSED;
+                setState(OpenCloseState.CLOSED);
             }
         });
     }
@@ -62,6 +62,7 @@ public class OpenCloseHandler {
             case OPEN:
             case OPENING:
                 break;
+            case NULL:
             case CLOSED:
                 openAnimator.start();
                 break;
@@ -82,6 +83,7 @@ public class OpenCloseHandler {
             case CLOSED:
             case CLOSING:
                 break;
+            case NULL:
             case OPEN:
                 closeAnimator.start();
                 break;
@@ -99,5 +101,8 @@ public class OpenCloseHandler {
 
     public OpenCloseState getState() {
         return state;
+    }
+    public void setState(OpenCloseState state) {
+        this.state = state;
     }
 }
