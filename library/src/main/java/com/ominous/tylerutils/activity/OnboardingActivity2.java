@@ -330,8 +330,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     }
 
     public void openAdvancedMenu(boolean now) {
-        advancedMenuOpenAnimator.setDuration(now ? 0 : 500);
-        advancedMenuHandler.open();
+        advancedMenuHandler.open(now);
     }
 
     public void closeAdvancedMenu() {
@@ -339,8 +338,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     }
 
     public void closeAdvancedMenu(boolean now) {
-        advancedMenuCloseAnimator.setDuration(now ? 0 : 500);
-        advancedMenuHandler.close();
+        advancedMenuHandler.close(now);
     }
 
     public abstract List<OnboardingContainer> createOnboardingContainers();

@@ -27,10 +27,14 @@ public class OpenCloseHandler {
 
     private final Animator openAnimator;
     private final Animator closeAnimator;
+    private final long openDuration;
+    private final long closeDuration;
 
     public OpenCloseHandler(Animator openAnimator, Animator closeAnimator) {
         this.openAnimator = openAnimator;
         this.closeAnimator = closeAnimator;
+        this.openDuration = openAnimator.getDuration();
+        this.closeDuration = closeAnimator.getDuration();
 
         this.openAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -57,16 +61,23 @@ public class OpenCloseHandler {
         });
     }
 
-    public void open() {
+    public void open(){
+        open(false);
+    }
+
+    public void open(boolean now) {
         switch (state) {
             case OPEN:
             case OPENING:
                 break;
             case NULL:
             case CLOSED:
+                openAnimator.setDuration(now ? 0 : openDuration);
                 openAnimator.start();
                 break;
             case CLOSING:
+                openAnimator.setDuration(now ? 0 : openDuration);
+                closeAnimator.setDuration(now ? 0 : closeDuration);
                 closeAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -78,16 +89,23 @@ public class OpenCloseHandler {
         }
     }
 
-    public void close() {
+    public void close(){
+        close(false);
+    }
+
+    public void close(boolean now) {
         switch (state) {
             case CLOSED:
             case CLOSING:
                 break;
             case NULL:
             case OPEN:
+                closeAnimator.setDuration(now ? 0 : closeDuration);
                 closeAnimator.start();
                 break;
             case OPENING:
+                openAnimator.setDuration(now ? 0 : openDuration);
+                closeAnimator.setDuration(now ? 0 : closeDuration);
                 openAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
