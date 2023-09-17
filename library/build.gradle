@@ -77,6 +77,8 @@ dependencies {
         exclude group: "androidx.fragment", module: "fragment"
         exclude group: "androidx.loader", module: "loader"
     }
+
+    implementation "com.ibm.icu:icu4j:72.1"
 }
 
 afterEvaluate {

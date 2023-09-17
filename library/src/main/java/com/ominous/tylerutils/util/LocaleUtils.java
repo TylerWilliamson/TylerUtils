@@ -23,58 +23,78 @@ import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
 public class LocaleUtils {
-    private static final SimpleDateFormat sdfHour24h = new SimpleDateFormat("H", Locale.US);
-    private static final SimpleDateFormat sdfHour12h = new SimpleDateFormat("ha", Locale.US);
-    private static final SimpleDateFormat sdfHourLong24h = new SimpleDateFormat("H00", Locale.US);
-    private static final SimpleDateFormat sdfHourLong12h = new SimpleDateFormat("ha", Locale.US);
+    private static boolean shouldOverride24HourFormat(Context context) {
+        String overrideLocale24Hour = Settings.System.getString(context.getContentResolver(), Settings.System.TIME_12_24);
 
-    public static String formatDateTime(Context context, Locale locale, Date date, TimeZone timeZone) {
-        DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.LONG, locale);
+        return overrideLocale24Hour != null && overrideLocale24Hour.equals("24");
+    }
 
-        if (df instanceof SimpleDateFormat) {
-            String pattern = ((SimpleDateFormat) df).toPattern().replaceAll(":ss", "");
-
-            if (is24HourFormat(context, locale)) {
-                pattern = pattern.replaceAll(" a", "").replaceAll("h", "H");
-            }
-
-            SimpleDateFormat sdf = new SimpleDateFormat(pattern, locale);
-
-            sdf.setTimeZone(timeZone);
-            return sdf.format(date);
+    public static String formatHour(Context context, Locale locale, Date date, java.util.TimeZone timeZone) {
+        if (shouldOverride24HourFormat(context)) {
+            return formatTime(context, locale, date, timeZone);
         } else {
-            df.setTimeZone(timeZone);
+            com.ibm.icu.util.TimeZone icuTimeZone = com.ibm.icu.util.TimeZone.getTimeZone(timeZone.getID());
+
+            com.ibm.icu.text.DateFormat df = com.ibm.icu.text.DateFormat.getInstanceForSkeleton("j", locale);
+            df.setTimeZone(icuTimeZone);
+
             return df.format(date);
         }
     }
 
-    public static String formatHour(Context context, Locale locale, Date date, TimeZone timeZone) {
-        if (is24HourFormat(context, locale)) {
-            sdfHour24h.setTimeZone(timeZone);
-            return sdfHour24h.format(date);
+    public static String formatTime(Context context, Locale locale, Date date, java.util.TimeZone timeZone) {
+        com.ibm.icu.util.TimeZone icuTimeZone = com.ibm.icu.util.TimeZone.getTimeZone(timeZone.getID());
+
+        com.ibm.icu.text.DateFormat df = com.ibm.icu.text.DateFormat.getTimeInstance(com.ibm.icu.text.DateFormat.SHORT, locale);
+
+        if (shouldOverride24HourFormat(context) && df instanceof com.ibm.icu.text.SimpleDateFormat) {
+            com.ibm.icu.text.DateFormat df2 = com.ibm.icu.text.DateFormat.getInstanceForSkeleton(
+                    ((com.ibm.icu.text.SimpleDateFormat) df).toPattern()
+                            .replaceAll("[hj]","H"));
+
+            df2.setTimeZone(icuTimeZone);
+            return df2.format(date);
         } else {
-            sdfHour12h.setTimeZone(timeZone);
-            return sdfHour12h.format(date).replaceAll("[mM. ]", "");
+            df.setTimeZone(icuTimeZone);
+            return df.format(date);
         }
     }
 
-    public static String formatHourLong(Context context, Locale locale, Date date, TimeZone timeZone) {
-        if (is24HourFormat(context, locale)) {
-            sdfHourLong24h.setTimeZone(timeZone);
-            return sdfHourLong24h.format(date);
+    public static String formatDateTime(Context context, Locale locale, Date date, java.util.TimeZone timeZone) {
+        com.ibm.icu.text.DateFormat df = com.ibm.icu.text.DateFormat.getDateTimeInstance(com.ibm.icu.text.DateFormat.MEDIUM, com.ibm.icu.text.DateFormat.LONG, locale);
+        com.ibm.icu.util.TimeZone icuTimeZone = com.ibm.icu.util.TimeZone.getTimeZone(timeZone.getID());
+
+        if (df instanceof com.ibm.icu.text.SimpleDateFormat) {
+            String pattern = ((com.ibm.icu.text.SimpleDateFormat) df).toPattern().replaceAll(":s+", "");
+
+            if (shouldOverride24HourFormat(context)) {
+                pattern = pattern
+                        .replaceAll("[hj]","H");
+            }
+
+            com.ibm.icu.text.SimpleDateFormat sdf = new com.ibm.icu.text.SimpleDateFormat(pattern, locale);
+
+            sdf.setTimeZone(icuTimeZone);
+            return sdf.format(date);
         } else {
-            sdfHourLong12h.setTimeZone(timeZone);
-            return sdfHourLong12h.format(date);
+            df.setTimeZone(icuTimeZone);
+            return df.format(date);
         }
+    }
+
+    /**
+    * @Deprecated
+    * Use formatTime instead
+    */
+    public static String formatHourLong(Context context, Locale locale, Date date, TimeZone timeZone) {
+        return formatTime(context, locale, date, timeZone);
     }
 
     public static long getStartOfDay(Date date, TimeZone timeZone) {
@@ -86,17 +106,6 @@ public class LocaleUtils {
         calendar.set(Calendar.MILLISECOND, 0);
 
         return calendar.getTimeInMillis();
-    }
-
-    private static boolean is24HourFormat(Context context, Locale locale) {
-        String overrideLocale24Hour = Settings.System.getString(context.getContentResolver(), Settings.System.TIME_12_24);
-
-        if (overrideLocale24Hour != null) {
-            return overrideLocale24Hour.equals("24");
-        }
-
-        DateFormat natural = DateFormat.getTimeInstance(DateFormat.LONG, locale);
-        return !(natural instanceof SimpleDateFormat) || ((SimpleDateFormat) natural).toPattern().indexOf('H') >= 0;
     }
 
     public static String getPercentageString(Locale locale, double percentage) {
