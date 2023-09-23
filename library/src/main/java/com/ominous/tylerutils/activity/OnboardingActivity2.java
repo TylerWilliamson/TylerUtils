@@ -67,6 +67,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     private ImageButton nextButton;
     private TextView finishButton;
     private TextView advancedButton;
+    private TextView advancedButtonClose;
 
     private LinearLayout indicators;
     private OnboardingPagerAdapter onboardingAdapter;
@@ -110,6 +111,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         nextButton = findViewById(R.id.button_next);
         finishButton = findViewById(R.id.button_finish);
         advancedButton = findViewById(R.id.button_advanced);
+        advancedButtonClose = findViewById(R.id.button_advanced_close);
 
         viewPager = findViewById(R.id.container);
         indicators = findViewById(R.id.indicators);
@@ -241,7 +243,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
             advancedOnboardingContainer.setInstantiated();
 
             advancedButton.setOnClickListener(v -> openAdvancedMenu());
-            findViewById(R.id.button_advanced_close).setOnClickListener(v -> closeAdvancedMenu());
+            advancedButtonClose.setOnClickListener(v -> closeAdvancedMenu());
         }
     }
 
@@ -339,6 +341,22 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
 
     public void closeAdvancedMenu(boolean now) {
         advancedMenuHandler.close(now);
+    }
+
+    public void setFinishButtonText(CharSequence text) {
+        finishButton.setText(text);
+    }
+
+    public void setAdvancedButtonText(CharSequence text) {
+        advancedButton.setText(text);
+    }
+
+    public void setNextButtonDescription(CharSequence description) {
+        nextButton.setContentDescription(description);
+    }
+
+    public void setCloseButtonText(CharSequence text) {
+        advancedButtonClose.setText(text);
     }
 
     public abstract List<OnboardingContainer> createOnboardingContainers();
