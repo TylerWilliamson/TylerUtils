@@ -49,14 +49,23 @@ import javax.net.ssl.HttpsURLConnection;
 
 import androidx.work.Data;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class HttpRequest {
-    public static final String METHOD_GET = "GET", METHOD_POST = "POST", COMPRESSION_NONE = "none", COMPRESSION_GZIP = "gzip";
+    public static final String METHOD_GET = "GET";
+    public static final String METHOD_POST = "POST";
+    public static final String COMPRESSION_NONE = "none";
+    public static final String COMPRESSION_GZIP = "gzip";
+    public static final String FORMAT_JSON = "application/json";
+    public static final String FORMAT_FORM = "application/x-www-form-urlencoded";
     private static final String UTF8 = "UTF-8";
     @SuppressWarnings("CharsetObjectCanBeUsed")
     private static final Charset UTF8Charset = Build.VERSION.SDK_INT >= 19 ? StandardCharsets.UTF_8 : Charset.forName(UTF8);
     private final String url;
     private final Map<String, String> requestHeaders = new HashMap<>();
-    private final Map<String, String> bodyParams = new HashMap<>();
+    private final Map<String, Object> bodyParams = new HashMap<>();
+    private String bodyFormat = FORMAT_FORM;
     private String method = METHOD_GET;
     private String compression = COMPRESSION_NONE;
     private Map<String, List<String>> responseHeaders;
@@ -72,8 +81,14 @@ public class HttpRequest {
         return this;
     }
 
-    public HttpRequest addBodyParam(String name, String value) {
+    public HttpRequest addBodyParam(String name, Object value) {
         bodyParams.put(name, value);
+
+        return this;
+    }
+
+    public HttpRequest setBodyFormat(String format) {
+        bodyFormat = format;
 
         return this;
     }
@@ -100,22 +115,47 @@ public class HttpRequest {
                 conn.addRequestProperty(entry.getKey(), entry.getValue());
             }
 
-            if (this.method.equals(METHOD_POST) && this.bodyParams.size() > 0) {
-                StringBuilder body = new StringBuilder();
+            if (this.method.equals(METHOD_POST) && !this.bodyParams.isEmpty()) {
+                conn.addRequestProperty("Content-Type", bodyFormat);
 
-                for (HashMap.Entry<String, String> entry : this.bodyParams.entrySet()) {
-                    if (body.length() > 0) {
-                        body.append('&');
-                    }
+                String body;
 
-                    body.append(URLEncoder.encode(entry.getKey(), UTF8))
-                            .append('=')
-                            .append(URLEncoder.encode(entry.getValue(), UTF8));
+                switch (bodyFormat) {
+                    case FORMAT_FORM:
+                        StringBuilder bodyBuilder = new StringBuilder();
+
+                        for (HashMap.Entry<String, Object> entry : this.bodyParams.entrySet()) {
+                            if (bodyBuilder.length() > 0) {
+                                bodyBuilder.append('&');
+                            }
+
+                            bodyBuilder.append(URLEncoder.encode(entry.getKey(), UTF8))
+                                    .append('=')
+                                    .append(URLEncoder.encode(entry.getValue().toString(), UTF8));
+                        }
+
+                        body = bodyBuilder.toString();
+                        break;
+                    case FORMAT_JSON:
+                        JSONObject bodyJson = new JSONObject();
+
+                        try {
+                            for (HashMap.Entry<String, Object> entry : this.bodyParams.entrySet()) {
+                                bodyJson.put(entry.getKey(), entry.getValue());
+                            }
+                        } catch (JSONException e) {
+                            throw new HttpException("HTTP: JSON Exception: " + e.getMessage(), e);
+                        }
+                        body = bodyJson.toString();
+
+                        break;
+                    default:
+                        throw new HttpException("HTTP: Illegal Body Format: " + bodyFormat);
                 }
 
                 try (OutputStream os = conn.getOutputStream();
                      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, UTF8Charset))) {
-                    writer.write(body.toString());
+                    writer.write(body);
                     writer.flush();
                 }
             }
