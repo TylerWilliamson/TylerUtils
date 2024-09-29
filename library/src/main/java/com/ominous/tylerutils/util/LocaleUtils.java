@@ -20,6 +20,7 @@
 package com.ominous.tylerutils.util;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.icu.text.DateFormat;
 import android.icu.text.NumberFormat;
 import android.icu.text.SimpleDateFormat;
@@ -190,5 +191,9 @@ public class LocaleUtils {
         } catch (ParseException e) {
             return 0;
         }
+    }
+
+    public static Locale getDefaultLocale(Configuration config) {
+        return Build.VERSION.SDK_INT >= 24 ? config.getLocales().get(0) : config.locale;
     }
 }
