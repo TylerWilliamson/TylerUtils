@@ -137,6 +137,18 @@ public class LocaleUtils {
         }
     }
 
+    public static String formatDate(Locale locale, Date date) {
+        if (Build.VERSION.SDK_INT >= 24) {
+            DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
+
+            return df.format(date);
+        } else {
+            java.text.DateFormat df = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, locale);
+
+            return df.format(date);
+        }
+    }
+
     /**
      * @Deprecated Use formatTime instead
      */
