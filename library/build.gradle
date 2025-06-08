@@ -23,7 +23,7 @@ android {
     namespace "com.ominous.tylerutils"
     compileSdk 36
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 36
         versionCode 1
         versionName "1.0"
