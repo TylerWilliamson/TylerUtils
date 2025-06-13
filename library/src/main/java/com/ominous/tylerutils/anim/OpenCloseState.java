@@ -23,6 +23,8 @@ public enum OpenCloseState {
     NULL,
     OPEN,
     OPENING,
+    OPENING_PARTIAL,
     CLOSED,
-    CLOSING
+    CLOSING,
+    CLOSING_PARTIAL
 }
