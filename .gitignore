@@ -2,4 +2,5 @@
 .gradle
 /local.properties
 /.idea
-/app/build
+/library/build
+/build
