@@ -39,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.activity.BackEventCompat;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -89,10 +90,49 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
                     closeAdvancedMenu();
                     break;
                 case CLOSED:
+                    if (viewPager.isFakeDragging()) {
+                        viewPager.endFakeDrag();
+                    }
+
                     viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
                     break;
                 case CLOSING:
                     break;
+            }
+        }
+
+        private float previousFakeDragProgress = 0f;
+        private int windowWidth = 0;
+
+        @Override
+        public void handleOnBackProgressed(@NonNull BackEventCompat backEvent) {
+            switch (advancedMenuHandler.getState()) {
+                case OPEN:
+                case OPENING:
+                    advancedMenuHandler.close(backEvent.getProgress() * 0.3f);
+                    break;
+                case CLOSED:
+                    if (!viewPager.isFakeDragging()) {
+                        viewPager.beginFakeDrag();
+                        previousFakeDragProgress = 0;
+
+                        windowWidth = OnboardingActivity2.this.getWindow().getDecorView().getWidth();
+                    }
+
+                    float amount = (backEvent.getProgress() - previousFakeDragProgress) * (windowWidth * 0.3f);
+
+                    viewPager.fakeDragBy(amount);
+
+                    previousFakeDragProgress = backEvent.getProgress();
+                case CLOSING:
+                    break;
+            }
+        }
+
+        @Override
+        public void handleOnBackCancelled() {
+            if (viewPager.isFakeDragging()) {
+                viewPager.endFakeDrag();
             }
         }
     };
@@ -172,7 +212,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         nextButton.setOnClickListener(this);
         finishButton.setOnClickListener(this);
 
-        if (savedInstanceState != null) {
+        if (savedInstanceState != null && !viewPager.isFakeDragging()) {
             viewPager.setCurrentItem(savedInstanceState.getInt(KEY_VIEWPAGER_PAGE, 0), false);
         }
 
@@ -257,7 +297,7 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if (id == R.id.button_next) {
+        if (id == R.id.button_next && !viewPager.isFakeDragging()) {
             viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
         } else if (id == R.id.button_finish) {
             if (onboardingAdapter.onboardingContainers.get(viewPager.getCurrentItem()).canAdvanceToNextPage()) {
@@ -324,7 +364,9 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     }
 
     public void setCurrentPage(int page, boolean smoothScroll) {
-        viewPager.setCurrentItem(page, smoothScroll);
+        if (!viewPager.isFakeDragging()) {
+            viewPager.setCurrentItem(page, smoothScroll);
+        }
     }
 
     public void openAdvancedMenu() {
@@ -427,8 +469,10 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        viewPager.setCurrentItem(
-                savedInstanceState.getInt(KEY_VIEWPAGER_PAGE, 0), false);
+        if (!viewPager.isFakeDragging()) {
+            viewPager.setCurrentItem(
+                    savedInstanceState.getInt(KEY_VIEWPAGER_PAGE, 0), false);
+        }
 
         for (int i = 0, l = onboardingContainers.size(); i < l; i++) {
             Bundle bundle = savedInstanceState.getBundle(Integer.toString(i));
