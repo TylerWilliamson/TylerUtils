@@ -29,12 +29,20 @@ import android.view.ViewGroup;
 import com.ominous.tylerutils.R;
 import com.ominous.tylerutils.util.ColorUtils;
 
+import androidx.annotation.ColorInt;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 
 public abstract class BaseCardView extends CardView implements View.OnClickListener {
     private final ValueAnimator pressedAnimation;
     private OnTouchListener onTouchListener = null;
+
+    @ColorInt
+    private int cardBackgroundColor;
+
+    @ColorInt
+    private int cardBackgroundColorPressed;
+    private final boolean isNightModeActive;
 
     public BaseCardView(Context context) {
         this(context, null, 0);
@@ -47,26 +55,32 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
     public BaseCardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, R.style.AppTheme_Card);
 
+
         this.setOnClickListener(this);
         this.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        this.setCardBackgroundColor(ContextCompat.getColor(context, R.color.card_background));
+        setCardBackgroundColors(
+                ContextCompat.getColor(getContext(), R.color.card_background),
+                ContextCompat.getColor(getContext(), R.color.card_background_pressed)
+        );
+
         this.setRadius(getResources().getDimensionPixelSize(R.dimen.margin_quarter));
         this.setCardElevation(context.getResources().getDimensionPixelSize(R.dimen.card_elevation));
 
+        this.isNightModeActive = ColorUtils.isNightModeActive(getContext());
         this.pressedAnimation = ValueAnimator.ofInt(
                         context.getResources().getDimensionPixelSize(R.dimen.card_elevation),
                         context.getResources().getDimensionPixelSize(R.dimen.card_elevation_pressed))
                 .setDuration(200);
 
         this.pressedAnimation.addUpdateListener(animation -> {
-            BaseCardView.this.setCardElevation((Integer) animation.getAnimatedValue());
+            setCardElevation((Integer) animation.getAnimatedValue());
 
-            if (ColorUtils.isNightModeActive(getContext())) {
-                BaseCardView.this.setCardBackgroundColor(
+            if (isNightModeActive) {
+                setCardBackgroundColor(
                         ColorUtils.blendColors(
-                                ContextCompat.getColor(getContext(), R.color.card_background),
-                                ContextCompat.getColor(getContext(), R.color.card_background_pressed),
+                                cardBackgroundColor,
+                                cardBackgroundColorPressed,
                                 animation.getAnimatedFraction() * 100));
             }
         });
@@ -85,6 +99,13 @@ public abstract class BaseCardView extends CardView implements View.OnClickListe
 
             return onTouchListener != null && onTouchListener.onTouch(v, event);
         });
+    }
+
+    public void setCardBackgroundColors(int backgroundColor, int backgroundColorPressed) {
+        this.cardBackgroundColor = backgroundColor;
+        this.cardBackgroundColorPressed = backgroundColorPressed;
+
+        setCardBackgroundColor(backgroundColor);
     }
 
     @Override
