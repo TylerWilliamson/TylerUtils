@@ -24,7 +24,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.os.Build;
@@ -40,7 +39,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.BackEventCompat;
+import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
+import androidx.activity.SystemBarStyle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -215,9 +216,6 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         if (savedInstanceState != null && !viewPager.isFakeDragging()) {
             viewPager.setCurrentItem(savedInstanceState.getInt(KEY_VIEWPAGER_PAGE, 0), false);
         }
-
-        WindowUtils.setLightNavBar(getWindow(),
-                (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES);
 
         if (advancedOnboardingContainer == null) {
             advancedMenuLayout.setVisibility(View.GONE);
@@ -507,6 +505,29 @@ public abstract class OnboardingActivity2 extends AppCompatActivity implements V
         Bundle advancedMenuBundle = new Bundle();
         advancedOnboardingContainer.onSaveInstanceState(advancedMenuBundle);
         outState.putBundle("ADV", advancedMenuBundle);
+    }
+
+    protected void setBackgroundColor(int backgroundColor) {
+        coordinatorLayout.setBackgroundColor(backgroundColor);
+    }
+
+    protected void setStatusAndNavigationBarColors(boolean isDark, int statusBarColor, int navigationBarColor) {
+        WindowUtils.setLightNavBar(getWindow(), !isDark);
+
+        if (isDark) {
+            EdgeToEdge.enable(this,
+                    SystemBarStyle.light(statusBarColor, statusBarColor),
+                    SystemBarStyle.light(navigationBarColor, navigationBarColor));
+        } else {
+            EdgeToEdge.enable(this,
+                    SystemBarStyle.dark(statusBarColor),
+                    SystemBarStyle.dark(navigationBarColor));
+        }
+
+        if (Build.VERSION.SDK_INT < 23) {
+            getWindow().setStatusBarColor(statusBarColor);
+            getWindow().setNavigationBarColor(navigationBarColor);
+        }
     }
 
     private static class OnboardingPagerAdapter extends RecyclerView.Adapter<OnboardingViewHolder> {
