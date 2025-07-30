@@ -89,7 +89,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.tylerwilliamson'
                 artifactId = 'TylerUtils'
-                version = '1.0.3'
+                version = '1.0.4'
             }
         }
     }

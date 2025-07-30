@@ -19,6 +19,7 @@
 
 package com.ominous.tylerutils.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -33,6 +34,8 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.material.color.utilities.Hct;
 
 public class ColorUtils {
     public static boolean isNightModeActive(Context context) {
@@ -128,10 +131,12 @@ public class ColorUtils {
     }
 
     public static double getContrastRatio(@ColorInt int color, @ColorInt int backgroundColor) {
-        double colorLum = getRelativeLuminance(color);
+        int foregroundColor = getCompositeColor(color, backgroundColor);
+
+        double foregroundColorLum = getRelativeLuminance(foregroundColor);
         double backgroundColorLum = getRelativeLuminance(backgroundColor);
-        return (Math.max(colorLum, backgroundColorLum) + 0.05) /
-                (Math.min(colorLum, backgroundColorLum) + 0.05);
+        return (Math.max(foregroundColorLum, backgroundColorLum) + 0.05) /
+                (Math.min(foregroundColorLum, backgroundColorLum) + 0.05);
     }
 
     public static double getRelativeLuminance(@ColorInt int color) {
@@ -145,52 +150,13 @@ public class ColorUtils {
         return 0.2126 * R + 0.7152 * G + 0.0722 * B;
     }
 
-    //Based on public domain function by Darel Rex Finley, 2006
-    //http://alienryderflex.com/hsp.html
     public static HSPColor RGBtoHSP(int color) {
-        double red = Color.red(color) / 255.0;
-        double green = Color.green(color) / 255.0;
-        double blue = Color.blue(color) / 255.0;
-        double alpha = Color.alpha(color) / 255.0;
-
-        double h, s, p = Math.sqrt(HSPColor.pR * red * red + HSPColor.pG * green * green + HSPColor.pB * blue * blue);
-
-        if (Math.abs(red - green) < 0.00001 && Math.abs(red - blue) < 0.00001) {
-            return new HSPColor(0, 0, p, alpha);
-        }
-        if (red >= green && red >= blue) {   //  red is largest
-            if (blue >= green) {
-                h = 1. - 1. / 6. * (blue - green) / (red - green);
-                s = 1. - green / red;
-            } else {
-                h = 0. / 6. + 1. / 6. * (green - blue) / (red - blue);
-                s = 1. - blue / red;
-            }
-        } else if (green >= red && green >= blue) {   //  green is largest
-            if (red >= blue) {
-                h = 2. / 6. - 1. / 6. * (red - blue) / (green - blue);
-                s = 1. - blue / green;
-            } else {
-                h = 2. / 6. + 1. / 6. * (blue - red) / (green - red);
-                s = 1. - red / green;
-            }
-        } else {   //  blue is largest
-            if (green >= red) {
-                h = 4. / 6. - 1. / 6. * (green - red) / (blue - red);
-                s = 1. - red / blue;
-            } else {
-                h = 4. / 6. + 1. / 6. * (red - green) / (blue - green);
-                s = 1. - green / blue;
-            }
-        }
-
-        return new HSPColor(h, s, p, alpha);
+        return HSPColor.from(color);
     }
 
     public static class HSPColor {
         private final static double pR = .299, pG = .587, pB = .114;
-        private final double saturation, alpha, hue;
-        private double perceivedBrightness;
+        public double saturation, alpha, hue, perceivedBrightness;
 
         public HSPColor(double hue, double saturation, double perceivedBrightness, double alpha) {
             this.hue = hue;
@@ -278,5 +244,83 @@ public class ColorUtils {
             }
             return Color.rgb((int) (r * 255), (int) (g * 255), (int) (b * 255)) | ((int) (alpha * 255) << 24);
         }
+
+        //Based on public domain function by Darel Rex Finley, 2006
+        //http://alienryderflex.com/hsp.html
+        public static HSPColor from(int color) {
+            double red = Color.red(color) / 255.0;
+            double green = Color.green(color) / 255.0;
+            double blue = Color.blue(color) / 255.0;
+            double alpha = Color.alpha(color) / 255.0;
+
+            double h, s, p = Math.sqrt(HSPColor.pR * red * red + HSPColor.pG * green * green + HSPColor.pB * blue * blue);
+
+            if (Math.abs(red - green) < 0.00001 && Math.abs(red - blue) < 0.00001) {
+                return new HSPColor(0, 0, p, alpha);
+            }
+            if (red >= green && red >= blue) {   //  red is largest
+                if (blue >= green) {
+                    h = 1. - 1. / 6. * (blue - green) / (red - green);
+                    s = 1. - green / red;
+                } else {
+                    h = 0. / 6. + 1. / 6. * (green - blue) / (red - blue);
+                    s = 1. - blue / red;
+                }
+            } else if (green >= red && green >= blue) {   //  green is largest
+                if (red >= blue) {
+                    h = 2. / 6. - 1. / 6. * (red - blue) / (green - blue);
+                    s = 1. - blue / green;
+                } else {
+                    h = 2. / 6. + 1. / 6. * (blue - red) / (green - red);
+                    s = 1. - red / green;
+                }
+            } else {   //  blue is largest
+                if (green >= red) {
+                    h = 4. / 6. - 1. / 6. * (green - red) / (blue - red);
+                    s = 1. - red / blue;
+                } else {
+                    h = 4. / 6. + 1. / 6. * (red - green) / (blue - green);
+                    s = 1. - green / blue;
+                }
+            }
+
+            return new HSPColor(h, s, p, alpha);
+        }
+    }
+
+    @ColorInt
+    @SuppressLint("RestrictedApi")
+    public static int getColorRole(@ColorInt int color, double tone, double chroma) {
+        Hct hctColor = Hct.fromInt(color);
+        hctColor.setTone(tone);
+        hctColor.setChroma(chroma);
+        return hctColor.toInt();
+    }
+
+    @ColorInt
+    public static int adjustSaturation(@ColorInt int color, double amount) {
+        ColorUtils.HSPColor hsp = ColorUtils.RGBtoHSP(color);
+        hsp.saturation *= amount;
+
+        return hsp.toRGB();
+    }
+
+    @ColorInt
+    public static int getCompositeColor(@ColorInt int color, @ColorInt int backgroundColor) {
+        int r1 = Color.red(color);
+        int r2 = Color.red(backgroundColor);
+        int g1 = Color.green(color);
+        int g2 = Color.green(backgroundColor);
+        int b1 = Color.blue(color);
+        int b2 = Color.blue(backgroundColor);
+        int a1 = Color.alpha(color);
+        int a2 = Color.alpha(backgroundColor);
+
+        return Color.argb(
+                a1 + (a2 * (255 - a1) / 255),
+                (r1 * a1 / 255) + (r2 * a2 * (255 - a1) / (255^2)),
+                (g1 * a1 / 255) + (g2 * a2 * (255 - a1) / (255^2)),
+                (b1 * a1 / 255) + (b2 * a2 * (255 - a1) / (255^2))
+        );
     }
 }
