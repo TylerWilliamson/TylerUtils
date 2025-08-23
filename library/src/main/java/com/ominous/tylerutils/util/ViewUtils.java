@@ -22,9 +22,14 @@ package com.ominous.tylerutils.util;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
+import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -47,6 +52,8 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import com.google.android.material.snackbar.Snackbar;
 import com.ominous.tylerutils.R;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Locale;
 
 public class ViewUtils {
@@ -207,5 +214,43 @@ public class ViewUtils {
                 }
             }
         });
+    }
+
+    public static void setScrollbarColor(@NonNull View view, @ColorInt int color) {
+        Drawable verticalScrollbarThumbDrawable = null;
+
+        if (Build.VERSION.SDK_INT >= 29) {
+            verticalScrollbarThumbDrawable = view.getVerticalScrollbarThumbDrawable();
+        } else {
+            try {
+                @SuppressLint("DiscouragedPrivateApi")
+                Field mScrollCacheField = View.class.getDeclaredField("mScrollCache");
+                mScrollCacheField.setAccessible(true);
+                Object mScrollCache = mScrollCacheField.get(view);
+
+                if (mScrollCache != null) {
+                    Field scrollBarField = mScrollCache.getClass().getDeclaredField("scrollBar");
+                    scrollBarField.setAccessible(true);
+                    Object scrollBar = scrollBarField.get(mScrollCache);
+
+                    if (scrollBar != null) {
+                        Method method = scrollBar.getClass().getDeclaredMethod("getVerticalThumbDrawable");
+                        method.setAccessible(true);
+
+                        verticalScrollbarThumbDrawable = (Drawable) method.invoke(scrollBar);
+                    }
+                }
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (verticalScrollbarThumbDrawable != null) {
+            verticalScrollbarThumbDrawable.setColorFilter(
+                    new PorterDuffColorFilter(
+                            color,
+                            PorterDuff.Mode.SRC_IN));
+        }
     }
 }
