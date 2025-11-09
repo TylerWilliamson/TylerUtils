@@ -137,15 +137,36 @@ public class LocaleUtils {
         }
     }
 
-    public static String formatDate(Locale locale, Date date) {
+    public static String formatDate(Context context, Locale locale, Date date, java.util.TimeZone timeZone) {
         if (Build.VERSION.SDK_INT >= 24) {
             DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
+            TimeZone icuTimeZone = TimeZone.getTimeZone(timeZone.getID());
 
-            return df.format(date);
+            if (df instanceof SimpleDateFormat) {
+                String pattern = ((SimpleDateFormat) df).toPattern().replaceAll(":s+", "");
+
+                SimpleDateFormat sdf = new SimpleDateFormat(pattern, locale);
+
+                sdf.setTimeZone(icuTimeZone);
+                return sdf.format(date);
+            } else {
+                df.setTimeZone(icuTimeZone);
+                return df.format(date);
+            }
         } else {
             java.text.DateFormat df = java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, locale);
 
-            return df.format(date);
+            if (df instanceof java.text.SimpleDateFormat) {
+                String pattern = ((java.text.SimpleDateFormat) df).toPattern().replaceAll(":s+", "");
+
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(pattern, locale);
+
+                sdf.setTimeZone(timeZone);
+                return sdf.format(date);
+            } else {
+                df.setTimeZone(timeZone);
+                return df.format(date);
+            }
         }
     }
 
